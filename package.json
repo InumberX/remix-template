@@ -1,0 +1,41 @@
+{
+  "name": "remix-3",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "NODE_ENV=development node --watch --import remix/node-tsx server.ts",
+    "hmr": "NODE_ENV=development node hmr.ts",
+    "upgrade": "npx npm-check-updates -u",
+    "upgrade-check": "npx npm-check-updates",
+    "start": "NODE_ENV=production node --import remix/node-tsx server.ts",
+    "test": "NODE_ENV=test node --import remix/node-tsx --test \"app/**/*.test.ts\" \"app/**/*.test.tsx\"",
+    "typecheck": "tsc -b",
+    "routes": "remix routes --table",
+    "doctor": "remix doctor",
+    "format": "oxfmt --check \"./{app,test}/**/*.{ts,tsx}\" \"./*.ts\"",
+    "format-fix": "oxfmt --write \"./{app,test}/**/*.{ts,tsx}\" \"./*.ts\"",
+    "lint": "oxlint . --max-warnings=0",
+    "lint-fix": "oxlint --fix .",
+    "stylelint": "stylelint \"./public/**/*.css\"",
+    "stylelint-fix": "stylelint --fix \"./public/**/*.css\"",
+    "pre-commit": "npm run typecheck && npm run format-fix && npm run lint-fix && npm run stylelint-fix"
+  },
+  "engines": {
+    "node": ">=24.3.0"
+  },
+  "volta": {
+    "node": "24.16.0"
+  },
+  "dependencies": {
+    "remix": "^3.0.0-rc.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.3",
+    "oxfmt": "^0.66.0",
+    "oxlint": "^1.81.0",
+    "stylelint": "^17.14.1",
+    "stylelint-config-standard": "^40.0.0",
+    "stylelint-order": "^8.1.1",
+    "typescript": "7.0.2"
+  }
+}

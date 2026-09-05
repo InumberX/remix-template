@@ -1,0 +1,15 @@
+{
+  "plugins": ["stylelint-order"],
+  "extends": ["stylelint-config-standard"],
+  "rules": {
+    "order/properties-alphabetical-order": true,
+    "no-descending-specificity": null,
+    "property-no-vendor-prefix": null,
+    "value-keyword-case": [
+      "lower",
+      { "ignoreKeywords": ["currentColor"], "ignoreProperties": ["/^--font-family/"] }
+    ],
+    "font-family-no-duplicate-names": [true, { "ignoreFontFamilyNames": ["monospace"] }]
+  },
+  "ignoreFiles": ["**/node_modules/**"]
+}

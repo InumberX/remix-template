@@ -1,0 +1,462 @@
+/*
+ * App-owned cascade layers.
+ *
+ * This file must be served verbatim, so it lives in the root `public/`
+ * directory (`staticFiles`) rather than under the asset server, whose CSS
+ * compiler rewrites `@layer` statements.
+ *
+ * The order declaration has to be registered before any `css(...)` rule.
+ * Remix appends its `style` tags (`data-rmx-style`) at the END of `<head>`, so
+ * a <link> written in app/actions/document.tsx is always parsed first.
+ *
+ * Weakest to strongest:
+ *   reset  user-agent normalization
+ *   lib    third-party stylesheets — pull them in with
+ *          `@import url('...') layer(lib);` so the app can override them
+ *   base   app-wide defaults and design tokens
+ *   rmx    every `css(...)` rule Remix generates (REMIX_UI_STYLE_LAYER)
+ *   util   utility classes; the only layer that outranks component styles
+ *
+ * Every layer used anywhere must be named here. A layer that is not
+ * pre-declared takes its position from first appearance, which puts it LAST —
+ * an unlisted `@layer` block would silently outrank every component rule.
+ * Blocks below are kept in the same order as this statement.
+ */
+@layer reset, lib, base, rmx, util;
+
+@layer reset {
+  html {
+    box-sizing: border-box;
+    -moz-tab-size: 4;
+    tab-size: 4;
+    -webkit-text-size-adjust: 100%;
+    word-break: normal;
+  }
+
+  *,
+  ::after,
+  ::before {
+    background-repeat: no-repeat;
+    box-sizing: inherit;
+  }
+
+  ::after,
+  ::before {
+    text-decoration: inherit;
+    vertical-align: inherit;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+  }
+
+  hr {
+    color: inherit;
+    height: 0;
+    overflow: visible;
+  }
+
+  details,
+  main {
+    display: block;
+  }
+
+  summary {
+    display: list-item;
+  }
+
+  small {
+    font-size: 80%;
+  }
+
+  [hidden] {
+    display: none;
+  }
+
+  abbr[title] {
+    border-bottom: none;
+    text-decoration: underline;
+    text-decoration: underline dotted;
+  }
+
+  a {
+    background-color: transparent;
+  }
+
+  a:active,
+  a:hover {
+    outline-width: 0;
+  }
+
+  code,
+  kbd,
+  pre,
+  samp {
+    font-family: monospace, monospace;
+  }
+
+  pre {
+    font-size: 1em;
+  }
+
+  b,
+  strong {
+    font-weight: bolder;
+  }
+
+  sub,
+  sup {
+    font-size: 75%;
+    line-height: 0;
+    position: relative;
+    vertical-align: baseline;
+  }
+
+  sub {
+    bottom: -0.25em;
+  }
+
+  sup {
+    top: -0.5em;
+  }
+
+  table {
+    border-color: inherit;
+    text-indent: 0;
+  }
+
+  iframe {
+    border-style: none;
+  }
+
+  input {
+    border-radius: 0;
+  }
+
+  [type='number']::-webkit-inner-spin-button,
+  [type='number']::-webkit-outer-spin-button {
+    height: auto;
+  }
+
+  [type='search'] {
+    -webkit-appearance: textfield;
+    outline-offset: -2px;
+  }
+
+  [type='search']::-webkit-search-decoration {
+    -webkit-appearance: none;
+  }
+
+  textarea {
+    overflow: auto;
+    resize: vertical;
+  }
+
+  button,
+  input,
+  optgroup,
+  select,
+  textarea {
+    font: inherit;
+  }
+
+  optgroup {
+    font-weight: 700;
+  }
+
+  button {
+    overflow: visible;
+  }
+
+  button,
+  select {
+    text-transform: none;
+  }
+
+  [role='button'],
+  [type='button'],
+  [type='reset'],
+  [type='submit'],
+  button {
+    cursor: pointer;
+  }
+
+  [type='button']::-moz-focus-inner,
+  [type='reset']::-moz-focus-inner,
+  [type='submit']::-moz-focus-inner,
+  button::-moz-focus-inner {
+    border-style: none;
+    padding: 0;
+  }
+
+  [type='button']::-moz-focus-inner,
+  [type='reset']::-moz-focus-inner,
+  [type='submit']::-moz-focus-inner,
+  button:-moz-focusring {
+    outline: 1px dotted;
+  }
+
+  [type='reset'],
+  [type='submit'],
+  button,
+  html [type='button'] {
+    -webkit-appearance: button;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    background-color: transparent;
+    border-style: none;
+  }
+
+  a:focus,
+  button:focus,
+  input:focus,
+  select:focus,
+  textarea:focus {
+    outline-width: 0;
+  }
+
+  select {
+    -moz-appearance: none;
+    -webkit-appearance: none;
+  }
+
+  select::-ms-expand {
+    display: none;
+  }
+
+  select::-ms-value {
+    color: currentColor;
+  }
+
+  legend {
+    border: 0;
+    color: inherit;
+    display: table;
+    max-width: 100%;
+    white-space: normal;
+  }
+
+  ::-webkit-file-upload-button {
+    -webkit-appearance: button;
+    color: inherit;
+    font: inherit;
+  }
+
+  [disabled] {
+    cursor: default;
+  }
+
+  img {
+    border-style: none;
+  }
+
+  progress {
+    vertical-align: baseline;
+  }
+
+  [aria-busy='true'] {
+    cursor: progress;
+  }
+
+  [aria-controls] {
+    cursor: pointer;
+  }
+
+  [aria-disabled='true'] {
+    cursor: default;
+  }
+}
+
+/*
+ * base — defaults and design tokens every component rule may override.
+ *
+ * Custom properties MUST sit inside a layer. Declarations written outside any
+ * `@layer` belong to an implicit final layer that outranks every named one, so
+ * an unlayered `:root { --x }` could not be overridden from `util` at all.
+ */
+@layer base {
+  :root {
+    /* Font */
+    --font-family-main:
+      'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Noto Sans JP',
+      sans-serif;
+    --font-weight-medium: 500;
+    --font-weight-bold: 700;
+
+    /* Color */
+    --color-util-black: #000;
+    --color-util-white: #fff;
+
+    /* Layout — consumed by app/ui/layouts/* */
+    --layout-inner-width-small: 800px;
+    --layout-inner-width-medium: 1064px;
+    --layout-inner-width-large: 1376px;
+    --layout-inner-padding-xs: 4vi;
+    --layout-inner-padding-sm: 4.6vi;
+    --layout-inner-padding-md: 32px;
+    --layout-header-height-small: 64px;
+    --layout-header-height-medium: 72px;
+    --layout-header-space-top: 16px;
+  }
+
+  * {
+    box-sizing: border-box;
+    min-inline-size: 1px;
+
+    &::before,
+    &::after {
+      box-sizing: border-box;
+      min-inline-size: 1px;
+    }
+  }
+
+  html {
+    background: var(--color-util-white);
+    block-size: 100%;
+    color: var(--color-util-black);
+    inline-size: 100%;
+    line-height: 1;
+  }
+
+  body {
+    color: var(--color-util-black);
+    font-family: var(--font-family-main);
+    font-weight: var(--font-weight-medium);
+    inline-size: 100%;
+    -webkit-line-break: strict;
+    line-break: strict;
+    line-height: 1.6;
+    overflow: clip auto;
+    -webkit-overflow-wrap: anywhere;
+    overflow-wrap: anywhere;
+    text-size-adjust: 100%;
+    vertical-align: baseline;
+    -webkit-word-break: normal;
+    word-break: normal;
+  }
+
+  ul,
+  ol {
+    list-style: none;
+  }
+
+  audio,
+  canvas,
+  progress,
+  video {
+    display: inline-block;
+    vertical-align: baseline;
+  }
+
+  audio:not([controls]) {
+    block-size: 0;
+    display: none;
+  }
+
+  [hidden]:not([hidden='until-found']),
+  template {
+    display: none;
+  }
+
+  a {
+    color: var(--color-util-black);
+    text-decoration: none;
+    transition:
+      0.3s color,
+      0.3s opacity,
+      0.3s background-color,
+      0.3s border-color;
+
+    &:link,
+    &:visited {
+      color: var(--color-util-black);
+      text-decoration: none;
+    }
+
+    @media (any-hover: hover) {
+      &:hover {
+        color: var(--color-util-black);
+      }
+    }
+  }
+
+  i,
+  em,
+  address {
+    font-style: normal;
+  }
+
+  b,
+  strong,
+  em {
+    font-weight: var(--font-weight-bold);
+  }
+
+  img {
+    block-size: auto;
+    border-block: none;
+    border-inline: none;
+    max-inline-size: 100%;
+    vertical-align: top;
+  }
+
+  svg {
+    overflow: hidden;
+  }
+
+  hr {
+    block-size: 0;
+    box-sizing: content-box;
+  }
+
+  pre {
+    overflow: auto;
+  }
+
+  code,
+  kbd,
+  pre,
+  samp {
+    font-family: var(--font-family-main);
+
+    /* getFontSize(10) — 10px at the default 16px root */
+    font-size: 0.625rem;
+  }
+
+  table {
+    border-collapse: collapse;
+    border-spacing: 0;
+  }
+
+  body,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  dl,
+  dt,
+  dd,
+  p,
+  blockquote,
+  ul,
+  ol,
+  li {
+    /* getClampRem(14, 16) — fluid between the 360px and 1400px viewports */
+    font-size: clamp(0.875rem, 0.832rem + 0.19vi, 1rem);
+  }
+
+  [role='tabpanel']:target {
+    display: revert;
+  }
+}
+
+@layer util {
+  /* utility classes. Beats `rmx`, so keep it for deliberate overrides. */
+}
