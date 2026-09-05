@@ -29,10 +29,22 @@ export const exampleCopyButton: StyleRecipe = {
 /**
  * Inverted while a copy result is showing: an unmistakable state change built
  * from the two colour tokens the app actually declares.
+ *
+ * The `&:hover, &:focus-visible` block is repeated rather than inherited. The
+ * spread that merges this over the base is SHALLOW, so a modifier that only set
+ * `background` at the top level would leave the base's hover block untouched and
+ * lose to it — and a mouse click always leaves the pointer on the button, so the
+ * inverted state would be invisible in the one path that produces it (white text
+ * on the near-white hover tint).
  */
 export const exampleCopyButton__active: StyleRecipe = {
   background: 'var(--color-util-black)',
   color: 'var(--color-util-white)',
+  '&:hover, &:focus-visible': {
+    background: 'var(--color-util-black)',
+    color: 'var(--color-util-white)',
+    outline: 'none',
+  },
 }
 
 export const exampleCopyButton_label: StyleRecipe = {
