@@ -3,7 +3,7 @@ import * as assert from 'remix/assert'
 import { css } from 'remix/ui'
 import { renderToString } from 'remix/ui/server'
 
-import { BREAKPOINTS, BREAKPOINTS_MAX } from './breakpoints.ts'
+import { BREAKPOINTS } from './breakpoints.ts'
 import {
   CONTAINER_QUERY,
   CONTAINER_QUERY_BETWEEN,
@@ -15,7 +15,7 @@ import {
 describe('media and container queries', () => {
   it('derives its numbers from BREAKPOINTS', () => {
     assert.equal(MEDIA_QUERY.MD, `@media screen and (width >= ${BREAKPOINTS.md}px), print`)
-    assert.equal(MEDIA_QUERY_REVERSE.MD, `@media screen and (width <= ${BREAKPOINTS_MAX.md}px)`)
+    assert.equal(MEDIA_QUERY_REVERSE.MD, `@media screen and (width < ${BREAKPOINTS.md}px)`)
     assert.equal(CONTAINER_QUERY.SM, `@container (width >= ${BREAKPOINTS.sm}px)`)
   })
 
@@ -27,11 +27,13 @@ describe('media and container queries', () => {
   it('bounds between ranges so neighbours cannot overlap', () => {
     assert.equal(
       MEDIA_QUERY_BETWEEN.SM_LG,
-      '@media screen and (width >= 576px) and (width <= 991px)'
+      '@media screen and (width >= 576px) and (width < 992px)'
     )
-    assert.equal(CONTAINER_QUERY_BETWEEN.SM_LG, '@container (width >= 576px) and (width <= 991px)')
-    // MD starts exactly where SM_MD stops.
-    assert.equal(MEDIA_QUERY_BETWEEN.SM_MD.includes(`${BREAKPOINTS_MAX.md}px`), true)
+    assert.equal(CONTAINER_QUERY_BETWEEN.SM_LG, '@container (width >= 576px) and (width < 992px)')
+    // SM_MD stops exactly where MD starts, with no width in between — the whole
+    // point of an exclusive upper bound rather than `<= (breakpoint - 1)`.
+    assert.equal(MEDIA_QUERY_BETWEEN.SM_MD.includes(`width < ${BREAKPOINTS.md}px`), true)
+    assert.equal(MEDIA_QUERY.MD.includes(`width >= ${BREAKPOINTS.md}px`), true)
   })
 
   it('drops straight into a css(...) computed key', async () => {
@@ -46,7 +48,7 @@ describe('media and container queries', () => {
     const html = await renderToString(<span mix={style}>x</span>)
 
     assert.match(html, /@media screen and \(width >= 768px\), print \{/)
-    assert.match(html, /@media screen and \(width <= 575px\) \{/)
+    assert.match(html, /@media screen and \(width < 576px\) \{/)
     assert.match(html, /@container \(width >= 576px\) \{/)
     assert.match(html, /@layer rmx\./)
   })

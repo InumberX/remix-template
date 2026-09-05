@@ -7,12 +7,12 @@ import type { StyleRecipe } from './mixins.ts'
  *
  *   getRgba(changeColorHexToRgb('#2f3a3a'), 0.6)  ->  'rgba(47, 58, 58, 0.6)'
  */
-export function getRgba(color: string, alpha: number): string {
+export const getRgba = (color: string, alpha: number): string => {
   return `rgba(${color}, ${alpha})`
 }
 
 /** Clips a background — usually a gradient — to the text it sits behind. */
-export function getTextGradation(color: string): StyleRecipe {
+export const getTextGradation = (color: string): StyleRecipe => {
   return {
     background: color,
     WebkitBackgroundClip: 'text',
@@ -22,7 +22,7 @@ export function getTextGradation(color: string): StyleRecipe {
 }
 
 /** `'#2f3a3a'` or `'#abc'` (with or without `#`) -> `'47, 58, 58'`. */
-export function changeColorHexToRgb(hex: string): string {
+export const changeColorHexToRgb = (hex: string): string => {
   const body = hex.startsWith('#') ? hex.slice(1) : hex
   const expanded =
     body.length === 3

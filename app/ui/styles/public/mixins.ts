@@ -32,7 +32,7 @@ export const getClampRem = (minSize: number, maxSize: number): string => {
  * Truncates to `maxLine` lines with an ellipsis. `-webkit-line-clamp` is the
  * only cross-browser way to do this; the `-webkit-box` display is required.
  */
-export function getLineClamp(maxLine: number): StyleRecipe {
+export const getLineClamp = (maxLine: number): StyleRecipe => {
   return {
     display: '-webkit-box',
     WebkitBoxOrient: 'vertical',

@@ -1,5 +1,10 @@
 import { css } from 'remix/ui'
 
+// Only the custom properties declared in `@layer base` of
+// public/static/css/app.css exist. The hover tint is derived from one of them
+// with color-mix rather than introducing a literal or a token nothing defines.
+const SURFACE_HOVER = 'color-mix(in srgb, var(--color-util-black) 6%, transparent)'
+
 export const exampleCopyButton = css({
   appearance: 'none',
   font: 'inherit',
@@ -12,12 +17,11 @@ export const exampleCopyButton = css({
   padding: '16px',
   border: 0,
   borderRadius: '12px',
-  color: 'var(--text-primary)',
+  color: 'var(--color-util-black)',
   background: 'transparent',
   transition: 'background-color 150ms ease, color 150ms ease',
   '&:hover, &:focus-visible': {
-    background: 'var(--surface-4)',
-    color: 'var(--brand-blue)',
+    background: SURFACE_HOVER,
     outline: 'none',
   },
 })

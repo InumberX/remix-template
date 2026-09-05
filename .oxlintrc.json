@@ -10,7 +10,7 @@
     "browser": true,
     "node": true
   },
-  "ignorePatterns": ["node_modules", "dist", "db", "tmp", "public"],
+  "ignorePatterns": ["node_modules", "dist", "db", "tmp", "/public"],
   "rules": {
     "import/first": "error",
     "import/namespace": "allow",

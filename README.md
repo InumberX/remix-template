@@ -154,7 +154,7 @@ css(styles.layoutInner)                             // 単体
 css({ ...styles.layoutInner, ...styleOverrides })   // マージ
 ```
 
-命名は素の BEM（`block`、`block_element`、`block__modifier`）。名前空間側が `styles` を担うので `style` 接頭辞は付けません。呼び出し側のプロパティ名が `styles` ではなく `styleOverrides` なのも同じ理由です。
+命名は BEM 風（`block`、`block_element`、`block__modifier`）です。ただし区切り文字は BEM とは逆で、`_` が要素、`__` が修飾子です（after_works の `Block__element` / `Block--modifier` とも逆になります）。これらは JavaScript の識別子であり `-` を含められないため `--` が使えず、残る2つを短い順に割り当てた結果です。名前空間側が `styles` を担うので `style` 接頭辞は付けません。呼び出し側のプロパティ名が `styles` ではなく `styleOverrides` なのも同じ理由です。
 
 メディアクエリとコンテナクエリは**関数ではなく定数**です。`css(...)` の計算キーはリテラル型を要求し、`string` を返すヘルパーだと `CSSProps` が継承する数値インデックスシグネチャと衝突します。
 

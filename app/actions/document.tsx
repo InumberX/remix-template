@@ -14,7 +14,14 @@ export type DocumentProps = {
    * `context.url` in the action, since a component has no request of its own.
    */
   meta?: PageMeta
-  url?: URL
+  /**
+   * Required, not optional. `renderMeta` needs it to build the canonical and
+   * og:url values, and every tag it returns — including the `noindex, nofollow`
+   * that `meta.tsx` forces outside production — would be dropped along with it.
+   * A page that simply forgot to pass it would still render, still typecheck and
+   * still pass its tests, while quietly becoming indexable on staging.
+   */
+  url: URL
 }
 
 export function Document(handle: Handle<DocumentProps>) {
@@ -33,7 +40,7 @@ export function Document(handle: Handle<DocumentProps>) {
               hence the cache buster. */}
           <link rel="stylesheet" href={`/static/css/app.css?${CACHE_BUSTER}`} />
           <title>{resolveTitle(meta)}</title>
-          {url ? renderMeta(meta, url) : null}
+          {renderMeta(meta, url)}
           {head}
           {entryPreloads.map((href) => (
             <link key={href} rel="modulepreload" href={href} />

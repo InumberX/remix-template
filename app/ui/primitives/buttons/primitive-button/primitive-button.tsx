@@ -71,6 +71,10 @@ export function PrimitiveButton(handle: Handle<PrimitiveButtonProps>) {
       )
     }
 
+    // The raw prop, not the destructured `buttonType`: that one carries the
+    // 'button' default above and is therefore always truthy. What decides this
+    // branch is whether the caller asked for a button at all — with neither a
+    // `url` nor a `buttonType`, the component falls through to the inert tag.
     if (handle.props.buttonType) {
       return (
         <button

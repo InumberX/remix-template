@@ -143,7 +143,7 @@ css(styles.layoutInner)                                    // one recipe
 css({ ...styles.layoutInner, ...styleOverrides })          // merged
 ```
 
-Spread only when merging — a single recipe goes in directly. Names are plain BEM: `block`, `block_element`, `block__modifier` (`primitiveButton__disabled`, `section_title`). No `style` prefix — the namespace already supplies it, and `styles.styleLayoutInner` stutters. The block name stays even though a `.styles.ts` belongs to one component, because it keeps the constants greppable and survives being moved. A variant record such as `layoutInnerSizes` holds the modifier constants rather than inlining them, so each variant still has a name of its own.
+Spread only when merging — a single recipe goes in directly. Names are BEM-shaped: `block`, `block_element`, `block__modifier` (`primitiveButton__disabled`, `section_title`). Note the separators are **not** BEM's: `_` marks an element and `__` a modifier, the opposite of BEM proper and of `after_works`' `Block__element` / `Block--modifier`. The reason is mechanical — these are JavaScript identifiers, and `-` cannot appear in one, so `--` was unavailable and the two remaining separators were assigned shortest-to-longest. No `style` prefix — the namespace already supplies it, and `styles.styleLayoutInner` stutters. The block name stays even though a `.styles.ts` belongs to one component, because it keeps the constants greppable and survives being moved. A variant record such as `layoutInnerSizes` holds the modifier constants rather than inlining them, so each variant still has a name of its own.
 
 **A `.styles.ts` may declare more than one block.** BEM elements do not nest, so a sub-tree that needs its own element names gets its own block prefix rather than a compound element name. `main-visual.styles.ts` is the worked example:
 
@@ -165,7 +165,7 @@ The caller-facing prop is `styleOverrides`, not `styles`: the namespace import o
 css({ color: 'red', [MEDIA_QUERY.MD]: { color: 'blue' } })
 ```
 
-`BREAKPOINTS_MAX` exists because TypeScript has no type-level arithmetic: `${BREAKPOINTS.md - 1}` degrades the string to a `${number}` pattern and breaks the computed key again. `breakpoints.test.ts` asserts the -1 relationship so the two objects cannot drift.
+Upper bounds are written as exclusive (`width < ${BREAKPOINTS.md}px`), which Media Queries Level 4 range syntax gives directly — the same syntax the lower bounds already use. Two reasons, and the second is why there is no `BREAKPOINTS_MAX` companion object: `<= 767px` next to `>= 768px` leaves a fractional viewport width (browser zoom, some high-DPI devices) matching neither; and expressing it would need the `- 1` values written out by hand, because TypeScript has no type-level arithmetic and `${BREAKPOINTS.md - 1}` degrades the string to a `${number}` pattern, breaking the computed key again.
 
 **Example code is prefixed and lives with whatever shows it.** `app/ui/` is production UI that more than one route needs, so a component named to say "do not use me" does not belong in it. `ExampleCopyButton` sits in `app/actions/dev-ui-page/public/components/` — owned by the gallery that displays it — and the `Example` prefix makes every piece of reference material greppable when a real project starts from this template. It is also the one worked example of `clientEntry` hydration.
 
@@ -177,7 +177,7 @@ Nothing in `app/ui/styles/` may import a component.
 
 ## Tests
 
-Co-locate tests beside what they test — `app/actions/controller.test.tsx`, `app/ui/**/<name>.test.tsx`, `app/env.test.ts`. The framework assumes this: `app/assets.ts` carries `denyFiles: ['app/**/*.test.*']` specifically so co-located tests are never browser-reachable, and the CLI discovers by filename pattern rather than location. Root `test/` is reserved for what the skill scopes it to — shared helpers, fixtures, and integration/E2E coverage — and does not exist yet.
+Co-locate tests beside what they test, one per component directory — `app/actions/controller.test.tsx`, `app/ui/**/<name>/<name>.test.tsx`, `app/env.test.ts`. The framework assumes this: `app/assets.ts` carries `denyFiles: ['app/**/*.test.*']` specifically so co-located tests are never browser-reachable, and the CLI discovers by filename pattern rather than location. Root `test/` is reserved for what the skill scopes it to — shared helpers, fixtures, and integration/E2E coverage — and does not exist yet.
 
 Drive route behavior with `router.fetch(new Request(...))` and assert on the `Response`; use `renderToString` for component specimens. See the note in **Commands** about `node:test` vs `remix/test`.
 

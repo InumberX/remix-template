@@ -1,4 +1,4 @@
-import { clientEntry, css, on, type Handle } from 'remix/ui'
+import { clientEntry, on, type Handle } from 'remix/ui'
 
 import * as styles from './example-copy-button.styles.ts'
 import type { ExampleCopyButtonProps } from './example-copy-button.types.ts'
@@ -27,14 +27,14 @@ export const ExampleCopyButton = clientEntry(
     let state: CopyState = 'idle'
 
     return () => {
-      let promptLabel = `\u201C${handle.props.text}\u201D`
-      let label =
+      const promptLabel = `\u201C${handle.props.text}\u201D`
+      const label =
         state === 'copied' || state === 'resetting'
           ? 'Copied to clipboard'
           : state === 'failed'
             ? 'Copy failed'
             : promptLabel
-      let active = state === 'copied' || state === 'failed' || state === 'resetting'
+      const active = state === 'copied' || state === 'failed' || state === 'resetting'
 
       return (
         <button
@@ -55,7 +55,7 @@ export const ExampleCopyButton = clientEntry(
                 await wait(FADE_MS)
                 if (signal.aborted) return
                 state = 'idle'
-                handle.update()
+                await handle.update()
                 return
               }
 
@@ -73,11 +73,13 @@ export const ExampleCopyButton = clientEntry(
               await handle.update()
             }),
           ]}
+          // Inverted while a copy result is showing: an unmistakable state
+          // change built from the two colour tokens the app actually declares.
           style={
             active
               ? {
-                  background: 'var(--surface-4)',
-                  color: 'var(--brand-blue)',
+                  background: 'var(--color-util-black)',
+                  color: 'var(--color-util-white)',
                 }
               : undefined
           }

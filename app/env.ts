@@ -7,8 +7,15 @@
 
 export type NodeEnv = 'development' | 'production' | 'test'
 
+/**
+ * Reads a port, falling back when the variable is unset or not a number. Without
+ * the `Number.isInteger` guard a typo would yield `NaN`, and because the ports
+ * below are derived from one another (`PORT + 1`, `HMR_PORT + 1`) that `NaN`
+ * would spread silently through the whole topology.
+ */
 const port = (value: string | undefined, fallback: number): number => {
-  return value ? Number.parseInt(value, 10) : fallback
+  const parsed = value === undefined ? Number.NaN : Number.parseInt(value, 10)
+  return Number.isInteger(parsed) ? parsed : fallback
 }
 
 export const NODE_ENV: NodeEnv = (process.env.NODE_ENV as NodeEnv | undefined) ?? 'development'
@@ -24,7 +31,7 @@ export const PORT = port(process.env.PORT, 44100)
 
 /** Set by `hmr.ts` on the child so `server.ts` logs the public URL, not its own. */
 export const HMR_PROXY_PORT = process.env.HMR_PROXY_PORT
-  ? Number.parseInt(process.env.HMR_PROXY_PORT, 10)
+  ? port(process.env.HMR_PROXY_PORT, PORT)
   : null
 
 /** Browser HMR event channel. */
@@ -57,7 +64,8 @@ export const NO_INDEX = process.env.NO_INDEX === 'true'
  *
  *   `/static/img/img.jpg?${CACHE_BUSTER}`  ->  `/static/img/img.jpg?${string}`
  *
- * Assets served by the asset server (`a `public/` directory`) do NOT need this: they
+ * Assets served by the asset server (anything under a `public/` directory) do
+ * NOT need this: they
  * already carry content-based ETags, and `fingerprint` in app/assets.ts would
  * give them immutable URLs.
  */
