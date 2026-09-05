@@ -1,0 +1,21 @@
+{
+  // Ported from auba-general-view. oxlint and oxfmt are the only linter and
+  // formatter here, so Prettier and ESLint are switched off explicitly —
+  // leaving either enabled makes them fight oxfmt on every save.
+  "editor.defaultFormatter": "oxc.oxc-vscode",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "explicit"
+  },
+  "[typescript]": { "editor.defaultFormatter": "oxc.oxc-vscode" },
+  "[typescriptreact]": { "editor.defaultFormatter": "oxc.oxc-vscode" },
+  "[javascript]": { "editor.defaultFormatter": "oxc.oxc-vscode" },
+  "[json]": { "editor.defaultFormatter": "oxc.oxc-vscode" },
+  "[jsonc]": { "editor.defaultFormatter": "oxc.oxc-vscode" },
+  // public/static/css/app.css is hand-maintained and its cascade layer order is
+  // load-bearing; leave it alone.
+  "[css]": { "editor.formatOnSave": false },
+  "css.validate": false,
+  "prettier.enable": false,
+  "eslint.enable": false
+}
