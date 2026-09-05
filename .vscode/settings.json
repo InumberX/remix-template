@@ -13,9 +13,14 @@
   "[json]": { "editor.defaultFormatter": "oxc.oxc-vscode" },
   "[jsonc]": { "editor.defaultFormatter": "oxc.oxc-vscode" },
   // public/static/css/app.css is hand-maintained and its cascade layer order is
-  // load-bearing; leave it alone.
+  // load-bearing; leave it alone. Formatting stays off for the same reason
+  // `stylelint --fix` is not run casually — see the note in CLAUDE.md.
   "[css]": { "editor.formatOnSave": false },
+  // VS Code's built-in CSS validation is off because stylelint is the authority
+  // here; without the line below nothing would check CSS in the editor at all,
+  // and `npm run stylelint` in CI would be the first place a problem shows up.
   "css.validate": false,
+  "stylelint.validate": ["css"],
   "prettier.enable": false,
   "eslint.enable": false
 }

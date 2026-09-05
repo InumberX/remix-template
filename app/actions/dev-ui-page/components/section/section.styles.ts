@@ -1,18 +1,22 @@
-import { css } from 'remix/ui'
+import type { StyleRecipe } from '../../../../ui/styles/public/mixins.ts'
 
-export const section = css({ margin: '0 0 48px' })
+export const section: StyleRecipe = { margin: '0 0 48px' }
 
-export const section_title = css({
+export const section_title: StyleRecipe = {
   margin: 0,
   paddingBottom: '4px',
   borderBottom: '1px solid #d6dada',
   fontSize: '16px',
-})
+}
 
-export const section_note = css({ margin: '8px 0 20px', color: '#6b7676', fontSize: '13px' })
+export const section_note: StyleRecipe = {
+  margin: '8px 0 20px',
+  color: '#6b7676',
+  fontSize: '13px',
+}
 
-export const section_grid = css({
+export const section_grid: StyleRecipe = {
   display: 'grid',
   gap: '12px',
   gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
-})
+}

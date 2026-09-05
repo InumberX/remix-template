@@ -1,7 +1,7 @@
 // Development-only gallery. It renders every component in app/ui/ through the
 // same server render pipeline the real pages use, so a specimen here cannot
 // diverge from what ships. `npm run hmr` reloads it on edit.
-import type { Handle } from 'remix/ui'
+import { css, type Handle } from 'remix/ui'
 
 import { routes } from '../../routes.ts'
 import { BaseButton } from '../../ui/buttons/base-button/base-button.tsx'
@@ -23,8 +23,8 @@ const PAGE_TITLE = 'UI ギャラリー'
 export function DevUiPage(handle: Handle<{ url: URL }>) {
   return () => (
     <Document url={handle.props.url} meta={{ title: PAGE_TITLE, robots: 'noindex, nofollow' }}>
-      <main mix={styles.devUiPage}>
-        <h1 mix={styles.devUiPage_heading}>{PAGE_TITLE}</h1>
+      <main mix={css(styles.devUiPage)}>
+        <h1 mix={css(styles.devUiPage_heading)}>{PAGE_TITLE}</h1>
 
         <Section title="PrimitiveButton" note="骨組みのみ。色・字送り・モーションを持たない">
           <Specimen label="url（内部リンク・SPA 遷移）">

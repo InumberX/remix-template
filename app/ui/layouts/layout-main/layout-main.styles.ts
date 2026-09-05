@@ -1,6 +1,12 @@
 import type { StyleRecipe } from '../../styles/public/mixins.ts'
 
-/** Descendants can size against this with `CONTAINER_QUERY.*`. */
+/**
+ * The container descendants size against. `CONTAINER_QUERY.*` carries no name,
+ * so it resolves to the NEAREST ancestor with `container-type` — this one, until
+ * something closer opens a container of its own. Targeting this container
+ * specifically needs the named form (`@container layout-main (...)`), which the
+ * shared constants do not build; write it out where you need it.
+ */
 export const LAYOUT_MAIN_CONTAINER = 'layout-main'
 
 export const layoutMain: StyleRecipe = {

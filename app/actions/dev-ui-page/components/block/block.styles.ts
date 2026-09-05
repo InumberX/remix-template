@@ -1,6 +1,6 @@
-import { css } from 'remix/ui'
+import type { StyleRecipe } from '../../../../ui/styles/public/mixins.ts'
 
-export const block = css({
+export const block: StyleRecipe = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -11,4 +11,6 @@ export const block = css({
   outline: '1px solid #d6dada',
   color: '#6b7676',
   fontSize: '11px',
-})
+}
+
+export const block__grow: StyleRecipe = { flex: '1 1 auto' }

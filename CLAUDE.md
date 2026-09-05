@@ -132,9 +132,11 @@ Create a category directory when it gets its first member; do not pre-create emp
 
 **Override styles by spreading recipes into one `css(...)` call, never by stacking descriptors.** Each `css(...)` emits its own `@layer rmx.<hash>`, and those sublayers are ordered by *first render*, not by position in a `mix` array — rendering a descriptor earlier elsewhere on the page flips the precedence of a later `mix={[base, override]}`. So `PrimitiveButton` takes a `styleOverrides` recipe and merges reset + disabled + caller into a single `css(...)`; output is content-hashed and deduplicated, and JS spread order decides the winner. `mix` stays for behavior (`on('click', …)`) and for styling that touches no property the reset already set.
 
+The spread is shallow, and that reaches the at-rule keys too: a modifier carrying `[MEDIA_QUERY.SM]` replaces the base's entire `[MEDIA_QUERY.SM]` object rather than merging into it, so it has to repeat every declaration of that block it still wants (`layout-page-wrapper.styles.ts` is the worked case).
+
 For deliberate app-wide overrides use cascade layers instead — the documented mechanism (https://guides.remix.run/rendering-ui/). Every `css(...)` rule lands in the `rmx` layer (`REMIX_UI_STYLE_LAYER`), and `public/static/css/app.css` declares the order around it. See **Global CSS** below. What layers do *not* give is ordering *within* `rmx`: `@layer` names passed to `css(...)` nest inside the per-descriptor layer and are inert for cross-descriptor precedence, so generalview's `componentPage → … → componentUiPrimitive` hierarchy has no direct equivalent. Merge recipes for that.
 
-**Style recipes live in `<name>.styles.ts` and are imported as a namespace.** Every component reads them the same way, so a call site says where a value came from without checking the import list:
+**Style recipes live in `<name>.styles.ts` and are imported as a namespace.** Every `.styles.ts` in the app exports plain recipes, never `css(...)` descriptors — including the ones under `app/actions/`. A descriptor cannot be spread, so exporting one takes the override mechanism away from the call site and pushes it to an inline `style` attribute. Every component reads them the same way, so a call site says where a value came from without checking the import list:
 
 ```ts
 import * as styles from './layout-inner.styles.ts'
@@ -148,12 +150,11 @@ Spread only when merging — a single recipe goes in directly. Names are BEM-sha
 **A `.styles.ts` may declare more than one block.** BEM elements do not nest, so a sub-tree that needs its own element names gets its own block prefix rather than a compound element name. `main-visual.styles.ts` is the worked example:
 
 ```ts
-mainVisual            mainVisual_container         // the outer div
-mainVisualTitle       mainVisualTitle_container    // the <h1> and its <figure>
-                      mainVisualTitle_image
+mainVisual            mainVisual_container    // the outer div
+mainVisualTitle       mainVisualTitle_image   // the <h1> and its image
 ```
 
-Flattening this would force `mainVisual_titleContainer` — an element of an element, which is what the convention exists to avoid — and only for one of the two containers, so the names stop being symmetric. Splitting `MainVisualTitle` into its own component would fix the names but multiply files for markup that renders once.
+Flattening this would force `mainVisual_titleImage` — an element of an element, which is what the convention exists to avoid. Three of those four recipes are deliberately empty: they are the template's slots, already named and already wired to their element, so a project filling them in does not have to invent a name and a `css(...)` call at the same time. (The image sits directly in the `<h1>`: `h1` takes phrasing content, and a `figure` is flow content.)
 
 **Extraction is decided by reuse and props, not by naming.** The gallery's `Section`, `Specimen`, `Stage` and `Block` moved into `components/<name>/` because each takes props and is rendered many times; a pseudo-block like `mainVisualTitle` stays inline because it is neither.
 
@@ -164,6 +165,8 @@ The caller-facing prop is `styleOverrides`, not `styles`: the namespace import o
 ```ts
 css({ color: 'red', [MEDIA_QUERY.MD]: { color: 'blue' } })
 ```
+
+Most of `media-query.ts` has no caller yet. It is the query vocabulary a project writes against, kept complete so a breakpoint is never spelled out inline — not dead code to prune. Note also that `CONTAINER_QUERY.*` carries no container name and so resolves to the nearest ancestor with `container-type`; targeting `layout-main` specifically needs the named form written out by hand.
 
 Upper bounds are written as exclusive (`width < ${BREAKPOINTS.md}px`), which Media Queries Level 4 range syntax gives directly — the same syntax the lower bounds already use. Two reasons, and the second is why there is no `BREAKPOINTS_MAX` companion object: `<= 767px` next to `>= 768px` leaves a fractional viewport width (browser zoom, some high-DPI devices) matching neither; and expressing it would need the `- 1` values written out by hand, because TypeScript has no type-level arithmetic and `${BREAKPOINTS.md - 1}` degrades the string to a `${number}` pattern, breaking the computed key again.
 
@@ -223,7 +226,7 @@ Measured on this app: a cold first visit is 46 requests / ~338 KB, because modul
 
 ## Lint and Format
 
-`oxlint` (`.oxlintrc.json`) and `oxfmt` (`.oxfmtrc.json`) are ported from the `auba-general-view` project, so the style rules match across both repos: no semicolons, single quotes, `printWidth` 100, `trailingComma: "es5"`, and grouped/sorted imports (builtin+external, then relative, then internal).
+`oxlint` (`.oxlintrc.json`) and `oxfmt` (`.oxfmtrc.json`) are ported from the `auba-general-view` project, so the style rules match across both repos: no semicolons, single quotes, `printWidth` 100, `trailingComma: "es5"`, and grouped/sorted imports (builtin+external, then relative). There is no internal group: `tsconfig.json` declares no `paths`, so this project has no `~/` alias to sort into one.
 
 The `react` plugin stays enabled for the runtime-agnostic JSX rules (`jsx-key`, `jsx-no-undef`, `jsx-no-duplicate-props`, …), but the rules that assume React's runtime are turned **off** in `.oxlintrc.json` — do not re-enable them:
 
@@ -243,6 +246,8 @@ The config is `stylelint-config-standard` plus the few adjustments the hand-writ
 - `value-keyword-case` ignores `currentColor` and any `--font-family-*` value, so real font names keep their capitals.
 - `font-family-no-duplicate-names` ignores `monospace`, because `monospace, monospace` is the normalize-era fix for inherited font sizing.
 - `no-descending-specificity` off, `order/properties-alphabetical-order` on — same as the `after_works` config.
+
+`.vscode/settings.json` turns VS Code's own CSS validation off and points `stylelint.validate` at CSS instead, so the editor reports what CI reports.
 
 **`stylelint --fix` escapes the literal sequence `<style` to `\3c style` when it writes the file**, comments included. The header comment in `app.css` is worded to avoid that sequence; keep it that way or every `stylelint-fix` run will mangle it.
 

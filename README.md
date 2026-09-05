@@ -154,6 +154,8 @@ css(styles.layoutInner)                             // 単体
 css({ ...styles.layoutInner, ...styleOverrides })   // マージ
 ```
 
+`.styles.ts` は必ずプレーンなレシピを export します（`css(...)` の結果ではありません）。descriptor はスプレッドできないため、export した時点で呼び出し側から上書き手段を奪い、インライン `style` へ追いやってしまいます。スプレッドは浅いので、`[MEDIA_QUERY.SM]` のようなネストしたキーは**マージではなく置換**になります。
+
 命名は BEM 風（`block`、`block_element`、`block__modifier`）です。ただし区切り文字は BEM とは逆で、`_` が要素、`__` が修飾子です（after_works の `Block__element` / `Block--modifier` とも逆になります）。これらは JavaScript の識別子であり `-` を含められないため `--` が使えず、残る2つを短い順に割り当てた結果です。名前空間側が `styles` を担うので `style` 接頭辞は付けません。呼び出し側のプロパティ名が `styles` ではなく `styleOverrides` なのも同じ理由です。
 
 メディアクエリとコンテナクエリは**関数ではなく定数**です。`css(...)` の計算キーはリテラル型を要求し、`string` を返すヘルパーだと `CSSProps` が継承する数値インデックスシグネチャと衝突します。

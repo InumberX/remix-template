@@ -18,6 +18,12 @@ export const layoutPageWrapper: StyleRecipe = {
  * generalview expressed these as class-combination selectors
  * (`&${topNoSpace}:not(...)`). Here they are recipes spread after the base, so
  * the override is decided by JS spread order rather than by selector weight.
+ *
+ * The spread is SHALLOW, and that applies to the at-rule keys too: a modifier
+ * carrying `[MEDIA_QUERY.SM]` replaces the base's whole `[MEDIA_QUERY.SM]`
+ * object rather than merging into it. So a modifier has to repeat every
+ * declaration of the base's media block that it still wants — add a property to
+ * the base block below and it disappears wherever this modifier is applied.
  */
 export const layoutPageWrapper__topNoSpace: StyleRecipe = {
   paddingBlockStart: 0,

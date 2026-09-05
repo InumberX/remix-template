@@ -1,11 +1,11 @@
-import { css } from 'remix/ui'
+import type { StyleRecipe } from '../../../../../ui/styles/public/mixins.ts'
 
 // Only the custom properties declared in `@layer base` of
 // public/static/css/app.css exist. The hover tint is derived from one of them
 // with color-mix rather than introducing a literal or a token nothing defines.
 const SURFACE_HOVER = 'color-mix(in srgb, var(--color-util-black) 6%, transparent)'
 
-export const exampleCopyButton = css({
+export const exampleCopyButton: StyleRecipe = {
   appearance: 'none',
   font: 'inherit',
   textAlign: 'left',
@@ -24,8 +24,18 @@ export const exampleCopyButton = css({
     background: SURFACE_HOVER,
     outline: 'none',
   },
-})
-export const exampleCopyButton_label = css({
+}
+
+/**
+ * Inverted while a copy result is showing: an unmistakable state change built
+ * from the two colour tokens the app actually declares.
+ */
+export const exampleCopyButton__active: StyleRecipe = {
+  background: 'var(--color-util-black)',
+  color: 'var(--color-util-white)',
+}
+
+export const exampleCopyButton_label: StyleRecipe = {
   alignItems: 'center',
   display: 'flex',
   fontSize: '14px',
@@ -34,14 +44,26 @@ export const exampleCopyButton_label = css({
   minWidth: 0,
   position: 'relative',
   transition: 'opacity 180ms ease',
-})
-export const exampleCopyButton_status = css({
+}
+
+/** Held at zero opacity for the fade-out step between `copied` and `idle`. */
+export const exampleCopyButton_label__fading: StyleRecipe = { opacity: 0 }
+
+export const exampleCopyButton_status: StyleRecipe = {
   alignItems: 'center',
   display: 'flex',
   inset: 0,
   position: 'absolute',
-})
-export const exampleCopyButton_icon = css({
+}
+
+/**
+ * The status text and the prompt occupy the same box, so exactly one of them is
+ * visible at a time. `visibility` rather than `display` keeps the box measured.
+ */
+export const exampleCopyButton__hidden: StyleRecipe = { visibility: 'hidden' }
+export const exampleCopyButton__visible: StyleRecipe = { visibility: 'visible' }
+
+export const exampleCopyButton_icon: StyleRecipe = {
   flex: '0 0 24px',
   width: '24px',
   display: 'flex',
@@ -53,4 +75,4 @@ export const exampleCopyButton_icon = css({
     display: 'block',
     transform: 'rotate(180deg)',
   },
-})
+}

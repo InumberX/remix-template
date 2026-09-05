@@ -1,4 +1,4 @@
-import { clientEntry, on, type Handle } from 'remix/ui'
+import { clientEntry, css, on, type Handle } from 'remix/ui'
 
 import * as styles from './example-copy-button.styles.ts'
 import type { ExampleCopyButtonProps } from './example-copy-button.types.ts'
@@ -40,7 +40,10 @@ export const ExampleCopyButton = clientEntry(
         <button
           type="button"
           mix={[
-            styles.exampleCopyButton,
+            css({
+              ...styles.exampleCopyButton,
+              ...(active ? styles.exampleCopyButton__active : null),
+            }),
             on('click', async (_event, signal) => {
               try {
                 await navigator.clipboard.writeText(handle.props.text)
@@ -73,34 +76,34 @@ export const ExampleCopyButton = clientEntry(
               await handle.update()
             }),
           ]}
-          // Inverted while a copy result is showing: an unmistakable state
-          // change built from the two colour tokens the app actually declares.
-          style={
-            active
-              ? {
-                  background: 'var(--color-util-black)',
-                  color: 'var(--color-util-white)',
-                }
-              : undefined
-          }
         >
-          <span aria-hidden="true" mix={styles.exampleCopyButton_icon}>
+          <span aria-hidden="true" mix={css(styles.exampleCopyButton_icon)}>
             <CopyIcon />
           </span>
           <span
-            mix={styles.exampleCopyButton_label}
-            style={{ opacity: state === 'resetting' ? 0 : 1 }}
+            mix={css({
+              ...styles.exampleCopyButton_label,
+              ...(state === 'resetting' ? styles.exampleCopyButton_label__fading : null),
+            })}
           >
             <span
               aria-hidden={state === 'idle' ? true : undefined}
-              mix={styles.exampleCopyButton_status}
-              style={{ visibility: state === 'idle' ? 'hidden' : 'visible' }}
+              mix={css({
+                ...styles.exampleCopyButton_status,
+                ...(state === 'idle'
+                  ? styles.exampleCopyButton__hidden
+                  : styles.exampleCopyButton__visible),
+              })}
             >
               {label}
             </span>
             <span
               aria-hidden={state === 'idle' ? undefined : true}
-              style={{ visibility: state === 'idle' ? 'visible' : 'hidden' }}
+              mix={css(
+                state === 'idle'
+                  ? styles.exampleCopyButton__visible
+                  : styles.exampleCopyButton__hidden
+              )}
             >
               {promptLabel}
             </span>

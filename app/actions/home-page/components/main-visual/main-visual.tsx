@@ -16,14 +16,14 @@ export function MainVisual() {
     <div mix={css(styles.mainVisual)}>
       <LayoutInner>
         <div mix={css(styles.mainVisual_container)}>
+          {/* The image is the heading itself, so it sits directly in the <h1>:
+              `h1` takes phrasing content, and a `figure` is flow content. */}
           <h1 mix={css(styles.mainVisualTitle)}>
-            <figure mix={css(styles.mainVisualTitle_container)}>
-              <img
-                src={`/static/img/img-sample-001.avif?${CACHE_BUSTER}`}
-                alt="Main Visual"
-                mix={css(styles.mainVisualTitle_image)}
-              />
-            </figure>
+            <img
+              src={`/static/img/img-sample-001.avif?${CACHE_BUSTER}`}
+              alt="Remix 3 スターターテンプレート"
+              mix={css(styles.mainVisualTitle_image)}
+            />
           </h1>
         </div>
       </LayoutInner>

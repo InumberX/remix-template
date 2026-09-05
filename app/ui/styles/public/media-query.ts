@@ -24,6 +24,10 @@
 //
 // Plain CSS cannot read these, so `public/static/css/app.css` writes its own
 // conditions by hand — there is no PostCSS `@custom-media` here.
+//
+// Most of the entries below have no caller yet: this is the query vocabulary a
+// project starting from the template writes against, kept complete so a
+// breakpoint is never spelled out inline. Do not prune them as dead code.
 import { BREAKPOINTS } from './breakpoints.ts'
 
 /** Mobile-first: at or above the breakpoint. Print always matches, as in generalview. */
