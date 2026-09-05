@@ -16,7 +16,9 @@
     "format-fix": "oxfmt --write \"./{app,test}/**/*.{ts,tsx}\" \"./*.ts\"",
     "lint": "oxlint . --max-warnings=0",
     "lint-fix": "oxlint --fix .",
-    "pre-commit": "npm run typecheck && npm run format-fix && npm run lint-fix"
+    "stylelint": "stylelint \"./public/**/*.css\"",
+    "stylelint-fix": "stylelint --fix \"./public/**/*.css\"",
+    "pre-commit": "npm run typecheck && npm run format-fix && npm run lint-fix && npm run stylelint-fix"
   },
   "engines": {
     "node": ">=24.3.0"
@@ -31,6 +33,9 @@
     "@types/node": "^24.13.3",
     "oxfmt": "^0.66.0",
     "oxlint": "^1.81.0",
+    "stylelint": "^17.14.1",
+    "stylelint-config-standard": "^40.0.0",
+    "stylelint-order": "^8.1.1",
     "typescript": "7.0.2"
   }
 }

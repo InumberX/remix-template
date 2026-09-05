@@ -33,7 +33,8 @@ http://localhost:44100 が開発サーバー、http://localhost:44100/dev/ui が
 | `npm run doctor` | プロジェクトのヘルスチェック |
 | `npm run lint` / `lint-fix` | oxlint（警告もエラー扱い） |
 | `npm run format` / `format-fix` | oxfmt |
-| `npm run pre-commit` | typecheck → format-fix → lint-fix |
+| `npm run stylelint` / `stylelint-fix` | stylelint（`public/` の CSS） |
+| `npm run pre-commit` | typecheck → format-fix → lint-fix → stylelint-fix |
 
 単一ファイル・単一テストの実行:
 
@@ -234,6 +235,38 @@ export const ExampleCopyButton = clientEntry(
 `oxlint`（`.oxlintrc.json`）と `oxfmt`（`.oxfmtrc.json`）を使用します。セミコロンなし、シングルクォート、`printWidth` 100、`trailingComma: "es5"`、インポートのグループ化とソート。
 
 `react` プラグインはランタイム非依存の JSX ルール（`jsx-key` など）のために有効ですが、React のランタイムを前提とするルールは**意図的に無効**にしています。`no-unknown-property`（`mix` プロパティとケバブケースの SVG 属性を誤検知）、`display-name`（Remix のコンポーネントは `function Name(handle) { return () => jsx }` の形なので無名コンポーネントと誤読される）、そして React 専用 API を対象とするフック系ルールです。
+
+### Stylelint
+
+`stylelint`（`.stylelintrc.json`）の対象は `public/static/css/**/*.css` だけです。コンポーネントのスタイルは `.styles.ts` のプレーンなオブジェクトで、stylelint は CSS テキストしか解析できないため対象外になります。
+
+`stylelint-config-standard` をベースに、手書きのリセット CSS と衝突する箇所だけを調整しています。
+
+- `property-no-vendor-prefix` — **無効**。`-webkit-text-size-adjust` などはリセットとして意図的に残しています。`--fix` に剥がされると Safari で挙動が変わります。
+- `value-keyword-case` — `currentColor` と `--font-family-*` の値を除外。フォント名の大文字を潰さないためです。
+- `font-family-no-duplicate-names` — `monospace` を除外。`monospace, monospace` は normalize 由来の意図的な重複です。
+- `no-descending-specificity` — 無効、`order/properties-alphabetical-order` — 有効。いずれも after_works と同じ設定です。
+
+`stylelint --fix` は書き出し時に `<style` という並びを `\3c style` にエスケープします。`app.css` 冒頭のコメントはこれを踏まないよう書いてあるので、その形を保ってください。
+
+## CI
+
+GitHub Actions は `.github/workflows/` にあります。after_works / sugidama と同じ構成です。
+
+| ワークフロー | トリガー | 内容 |
+| --- | --- | --- |
+| `push.yml` | 全ブランチへの push | `setup` →（`lint` / `test`）→ `routes` |
+| `automation-pr-label.yml` | PR 作成時 | ブランチの prefix から `enhancement` / `bug` を付与 |
+| `automation-release-pr.yml` | `develop` への push | `develop` → `main` のリリース PR を作成 |
+| `automation-release-note.yml` | `main` への push | `v{YYYY.MM.DD}-{連番}` のタグとリリースノートを生成 |
+
+`lint` ジョブは `format` → `stylelint` → `lint` → `typecheck` の順に走ります。
+
+Remix 3 にビルドステップは無いため、他リポジトリの `build` ジョブの位置には `routes` を置いています。`app/routes.ts` と各コントローラーの対応が壊れていればここで落ちます。
+
+Node のバージョンは `actions/setup-node` の `node-version-file` で `.node-version` から読みます。
+
+デプロイ先が未定のため `deploy.yml` は入れていません。自動ラベル付与には `enhancement` / `bug` / `release` の各ラベルがリポジトリ側に必要です。
 
 ## コーディング規約
 

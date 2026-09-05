@@ -22,7 +22,9 @@ npm run lint        # oxlint, warnings are errors
 npm run lint-fix    # oxlint --fix
 npm run format      # oxfmt --check
 npm run format-fix  # oxfmt --write
-npm run pre-commit  # typecheck -> format-fix -> lint-fix
+npm run stylelint   # stylelint over public/**/*.css
+npm run stylelint-fix
+npm run pre-commit  # typecheck -> format-fix -> lint-fix -> stylelint-fix
 ```
 
 Run a single test file or filter by name:
@@ -230,6 +232,38 @@ The `react` plugin stays enabled for the runtime-agnostic JSX rules (`jsx-key`, 
 - `react/rules-of-hooks`, `react/exhaustive-deps`, `react/no-direct-mutation-state`, `react/no-find-dom-node`, `react/no-is-mounted`, `react/no-render-return-value`, `react/no-string-refs`, `react/no-unsafe` — React-only APIs that do not exist here.
 
 `prefer-const` is intentionally left on: it only flags bindings that are never reassigned (props destructuring), and does not conflict with the component model's mutable setup-scope state, which stays `let`.
+
+### Stylelint
+
+`stylelint` (`.stylelintrc.json`) covers `public/static/css/**/*.css` and nothing else. Component styles live in `.styles.ts` as plain objects, and stylelint only parses CSS text, so that whole tier is outside its reach — do not expect it to catch anything under `app/ui/`.
+
+The config is `stylelint-config-standard` plus the few adjustments the hand-written reset needs:
+
+- `property-no-vendor-prefix` is **off**. `-webkit-text-size-adjust`, `-moz-tab-size` and the `appearance` prefixes are deliberate; `--fix` would strip them and change behaviour in Safari.
+- `value-keyword-case` ignores `currentColor` and any `--font-family-*` value, so real font names keep their capitals.
+- `font-family-no-duplicate-names` ignores `monospace`, because `monospace, monospace` is the normalize-era fix for inherited font sizing.
+- `no-descending-specificity` off, `order/properties-alphabetical-order` on — same as the `after_works` config.
+
+**`stylelint --fix` escapes the literal sequence `<style` to `\3c style` when it writes the file**, comments included. The header comment in `app.css` is worded to avoid that sequence; keep it that way or every `stylelint-fix` run will mangle it.
+
+## CI
+
+Workflows live in `.github/workflows/` and mirror the `after_works` / `sugidama` setup.
+
+| Workflow | Trigger | What it does |
+| --- | --- | --- |
+| `push.yml` | push to any branch | `setup` -> (`lint` / `test`) -> `routes` |
+| `automation-pr-label.yml` | PR opened | labels `enhancement` / `bug` from the branch prefix |
+| `automation-release-pr.yml` | push to `develop` | opens the `develop` -> `main` release PR |
+| `automation-release-note.yml` | push to `main` | cuts a `v{YYYY.MM.DD}-{n}` tag and generates the release note |
+
+The `lint` job runs `format`, `stylelint`, `lint`, `typecheck` in that order.
+
+Remix 3 has no build step, so where the other repos run a `build` job this one runs `routes`. `remix routes --table` loads `app/routes.ts` and every controller it names, which is the closest thing to a build-time check that the route contract still resolves.
+
+Node comes from `.node-version` via `actions/setup-node`'s `node-version-file`, so CI cannot drift from the pin the repo already carries.
+
+There is no `deploy.yml` — no deploy target is configured yet. The labelling workflows need `enhancement`, `bug` and `release` to exist as repository labels.
 
 ## Architecture
 
