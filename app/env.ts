@@ -47,10 +47,12 @@ export const APP_PORT = port(process.env.APP_PORT, HMR_PORT + 1)
  * `dev` rather than a timestamp so local reloads do not refetch the root
  * `public/` files.
  */
-export const BUILD_ID = process.env.BUILD_ID ?? 'dev'
+// `||`, not `??`: CI interpolating an unset variable hands over an empty
+// string, which would otherwise produce the cache key `ver=`.
+export const BUILD_ID = process.env.BUILD_ID || 'dev'
 
 /** Whether `BUILD_ID` came from the environment rather than the `dev` fallback. */
-export const HAS_BUILD_ID = process.env.BUILD_ID !== undefined
+export const HAS_BUILD_ID = Boolean(process.env.BUILD_ID)
 
 /** Absolute origin used to build canonical and og:url values. */
 export const SITE_URL = (process.env.SITE_URL ?? `http://localhost:${PORT}`).replace(/\/$/, '')
@@ -62,8 +64,9 @@ export const NO_INDEX = process.env.NO_INDEX === 'true'
  * Query string, without the `?`. Matches generalview's `ver=...` shape.
  *
  * Files under the root `public/` directory are served by `staticFiles` exactly
- * as they are on disk — no content hash, and no `Cache-Control` header — so a
- * per-deploy query string is what invalidates them in browsers. Append it where
+ * as they are on disk — no content hash, and cached for a day in production
+ * (app/router.ts) — so a per-deploy query string is what invalidates them in
+ * browsers. Append it where
  * the URL is written, keeping the pattern in the type:
  *
  *   `/static/img/img.jpg?${CACHE_BUSTER}`  ->  `/static/img/img.jpg?${string}`
