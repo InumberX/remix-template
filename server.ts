@@ -7,10 +7,12 @@ import { router } from './app/router.ts'
 // The listener's default `onError` logs and answers a generic 500, and it
 // drops errors that are only the request's own abort reason. Under `npm run
 // hmr` the request arrives through the fetch proxy, so trust its forwarded
-// headers there to keep `request.url` on the public origin.
+// headers there to keep `request.url` on the public origin — and bind to
+// loopback, like the proxy itself, so nothing else can reach the child and
+// forge those headers.
 const server = http.createServer(createRequestListener(router.fetch, { trustProxy: IS_NODE_HMR }))
 
-server.listen(PORT, () => {
+server.listen(PORT, IS_NODE_HMR ? '127.0.0.1' : undefined, () => {
   if (IS_NODE_HMR) {
     import('remix/node-hmr/runtime').then((nodeHmr) => nodeHmr.emitServerReady())
   }

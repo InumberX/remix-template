@@ -49,6 +49,9 @@ export const APP_PORT = port(process.env.APP_PORT, HMR_PORT + 1)
  */
 export const BUILD_ID = process.env.BUILD_ID ?? 'dev'
 
+/** Whether `BUILD_ID` came from the environment rather than the `dev` fallback. */
+export const HAS_BUILD_ID = process.env.BUILD_ID !== undefined
+
 /** Absolute origin used to build canonical and og:url values. */
 export const SITE_URL = (process.env.SITE_URL ?? `http://localhost:${PORT}`).replace(/\/$/, '')
 

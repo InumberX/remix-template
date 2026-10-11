@@ -42,12 +42,14 @@ export function Document(handle: Handle<DocumentProps>) {
           <link rel="stylesheet" href={`/static/css/app.css?${CACHE_BUSTER}`} />
           <title>{resolveTitle(meta)}</title>
           {renderMeta(meta, url)}
-          {head}
           <ImportMap value={scriptEntry.importMap} />
           {scriptEntry.preloads.map((href) => (
             <link key={href} rel="modulepreload" href={href} />
           ))}
           <script type="module" src={scriptEntry.href}></script>
+          {/* After the script entry: browsers without multiple-import-map support
+              must see the import map before any module a page adds here. */}
+          {head}
         </head>
         <body>
           <LayoutWrapper>{children}</LayoutWrapper>

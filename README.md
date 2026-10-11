@@ -217,7 +217,7 @@ export const ExampleCopyButton = clientEntry(
 
 ビルドがないため、キャッシュ識別子は 2 層とも実行時に決まります。どちらも本番のみ有効で、開発中は常に `no-cache` です。
 
-- **アセットサーバー（`/assets/*`）** — 本番では `fingerprint: true` がコンテンツハッシュを URL に挿入し（`entry.@PlFVt_.ts`）、`public, max-age=31536000, immutable` で配信します。ハッシュは出力されたモジュールの内容だけから作られるため、デプロイで URL が変わるのは実際に変更されたモジュールだけで、インスタンス間で何かを共有する必要もありません。ページは安定 URL を参照し、`document.tsx` が描画する `<ImportMap>` がそれをハッシュ付き URL に対応付けます。ファイルが変化しない前提なので `watch: false` が必須で、開発では無効にしています。
+- **アセットサーバー（`/assets/*`）** — 本番では `fingerprint: true` がコンテンツハッシュを URL に挿入し（`entry.@PlFVt_.ts`）、`public, max-age=31536000, immutable` で配信します。ハッシュは出力されたモジュールの内容だけから作られるため、デプロイで URL が変わるのは実際に変更されたモジュールだけで、インスタンス間で何かを共有する必要もありません。`getScriptEntry()` が返す `href` と preloads は最初からハッシュ付きで、モジュール内部の import は `document.tsx` が描画する `<ImportMap>` がハッシュ付き URL へ対応付けます。import map が書き換えるのは import の指定子だけで `src` / `href` 属性には効かないため、`/assets/...` の安定 URL を手書きした `<script src>` は、ハッシュなし・`no-cache` のファイルを取得してしまいます。URL はアセットサーバーから取得してください。ファイルが変化しない前提なので `watch: false` が必須で、開発では無効にしています。
 - **ルートの `public/`（`staticFiles`）** — 本番は `public, max-age=86400`。URL が固定なので `immutable` にはしません。アプリから参照するファイルは `?${CACHE_BUSTER}` を付けてデプロイごとに更新し、`favicon.svg` のように直接取得されるものは ETag の再検証に任せます。
 
 **全インスタンスで `BUILD_ID` を共有してください。** 現在の用途は `CACHE_BUSTER` だけですが、値が違うと同じ `app.css` に別の URL が割り当てられ、キャッシュが分断されます。既定値が `dev` なので、CI からコミット SHA を渡さないとデプロイしてもルート `public/` のファイルは無効化されません。

@@ -1,7 +1,7 @@
 import * as assert from 'remix/assert'
 import { describe, it } from 'remix/test'
 
-import { CACHE_BUSTER } from './env.ts'
+import { CACHE_BUSTER, HAS_BUILD_ID } from './env.ts'
 
 describe('CACHE_BUSTER', () => {
   it('is a bare query string, so a caller supplies the `?` itself', () => {
@@ -14,7 +14,7 @@ describe('CACHE_BUSTER', () => {
   // 環境変数を差し替えて読み直すことはできません。既定値だけを固定します。
   it(
     'falls back to `dev` so a deploy that forgets BUILD_ID invalidates nothing',
-    { skip: process.env.BUILD_ID === undefined ? false : 'BUILD_ID is set in this environment' },
+    { skip: HAS_BUILD_ID ? 'BUILD_ID is set in this environment' : false },
     () => {
       assert.equal(CACHE_BUSTER, 'ver=dev')
     }

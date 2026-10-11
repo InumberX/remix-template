@@ -26,6 +26,13 @@ const app = run({
   },
 })
 
+// Hydration, component, scheduler and frame failures are dispatched on the app
+// rather than thrown, and the default `resolveFrame` rejects any 5xx — without a
+// listener a failed frame reload just leaves stale HTML and logs nothing.
+app.addEventListener('error', (event) => {
+  console.error('Component error:', event.error)
+})
+
 if (import.meta.hot) {
   import.meta.hot.on('server:update', async () => {
     try {
