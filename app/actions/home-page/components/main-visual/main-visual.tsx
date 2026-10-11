@@ -8,8 +8,9 @@ import * as styles from './main-visual.styles.ts'
  * Page-local: only the home page renders it, so it stays inside the page
  * directory rather than moving to `app/ui/`.
  *
- * The image lives in root `public/`, which `staticFiles` serves with no
- * `Cache-Control`, hence the cache buster on the URL.
+ * The image lives in root `public/`, whose URLs never change on their own and
+ * which production caches for a day (app/router.ts), hence the cache buster on
+ * the URL.
  */
 export function MainVisual() {
   return () => (
