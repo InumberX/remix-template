@@ -1,5 +1,5 @@
 // Ported from auba-general-view: app/components/ui/layouts/LayoutInner
-import { css, type Handle, type MixInput } from 'remix/ui'
+import { css, type Handle, type MixInput } from 'remix/component'
 
 import * as styles from './layout-inner.styles.ts'
 import type { LayoutInnerProps } from './layout-inner.types.ts'
