@@ -1,6 +1,6 @@
 // Styled counterpart to the unstyled primitive: it adds tone, padding, radius
 // and motion, and delegates element selection and accessibility downwards.
-import type { Handle } from 'remix/ui'
+import type { Handle } from 'remix/component'
 
 import { PrimitiveButton } from '../../primitives/buttons/primitive-button/primitive-button.tsx'
 import * as styles from './base-button.styles.ts'

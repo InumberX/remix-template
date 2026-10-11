@@ -3,7 +3,7 @@
 // components that use it are hydrated.
 //
 // Derive from Remix's own JSX types wherever Remix pins the union, and hand
-// declare only the narrowings this app chooses to impose. `remix/ui` does not
+// declare only the narrowings this app chooses to impose. `remix/component` does not
 // re-export its internal DOM types (`AriaRole`, `HTMLAttributeAnchorTarget`),
 // so the JSX namespace is the supported seam.
 

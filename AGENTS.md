@@ -15,12 +15,12 @@ npm run typecheck
 
 ## Building Features
 
-Refer to ./.agents/skills/remix/SKILL.md
+Refer to ./.agents/skills/remix/SKILL.md for the Remix mental model and how to find guides and API READMEs through `node_modules/remix/INDEX.md`. Project-specific conventions are in `CLAUDE.md`.
 
 ## Starter Layout
 
 - `app/routes.ts` defines the shared route contract used by server and browser modules for type-safe hrefs
-- `app/router.ts` wires routes to route handlers and installs the standard Remix UI renderer used by actions
+- `app/router.ts` wires routes to route handlers and installs the standard Remix component renderer used by actions
 - `app/assets.ts` owns the server-side asset pipeline used by the asset route and render middleware
 - `app/env.ts` is the only module that reads `process.env`; everything else imports the resolved constants
 - `app/actions/controller.tsx` owns the direct leaf route actions (`assets`, `home`, `devUi`)
@@ -39,8 +39,22 @@ Refer to ./.agents/skills/remix/SKILL.md
 - Keep route-owned page modules next to the route that owns them.
 - Move shared UI to `app/ui/`, not `app/actions/`.
 
+- A controller's `actions` object contains only direct leaf route keys; nested route maps get their own controller and an explicit `router.map(routes.<routeKey>, controller)` line.
+- Name directories under `app/actions/` after route-map keys, not URL path segments.
+- Controller middleware does not protect other controllers; add it to each controller that needs it.
+
+## Placement Precedence
+
+When code could live in more than one place:
+
+1. Put it in the narrowest owner first; if it belongs to one route, keep it with that route.
+2. Shared UI across route areas goes in `app/ui/`.
+3. Request lifecycle setup (auth, sessions, uploads, database injection) goes in `app/middleware/`.
+4. Schema, queries, persistence and startup data logic go in `app/data/`.
+5. `app/utils/<topic>.ts` only as a last resort, for pure cross-layer helpers that import nothing from `app/actions/` or response/render APIs.
+
 ## Build-Out Notes
 
-- This starter intentionally begins small; add directories like `app/data/` and `test/` only when you need them.
-- Prefer putting code in the narrowest owner before introducing shared modules.
-- Avoid generic dumping-ground directories like `app/lib/` or `app/components/`.
+- This starter intentionally begins small; add directories like `app/data/`, `app/middleware/` and `test/` only when you need them.
+- Avoid generic dumping-ground directories: no `app/lib/`, no `app/components/` (that is `app/ui/`), no `app/controllers/` (that is `app/actions/`).
+- Do not register app leaf routes directly in `app/router.ts`; they belong in a controller.

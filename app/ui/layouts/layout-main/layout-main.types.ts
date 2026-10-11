@@ -1,4 +1,4 @@
-import type { MixInput, RemixNode } from 'remix/ui'
+import type { MixInput, RemixNode } from 'remix/component'
 
 import type { StyleRecipe } from '../../styles/public/mixins.ts'
 

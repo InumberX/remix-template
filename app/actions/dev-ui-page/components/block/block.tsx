@@ -1,4 +1,4 @@
-import { css, type Handle } from 'remix/ui'
+import { css, type Handle } from 'remix/component'
 
 import * as styles from './block.styles.ts'
 import type { BlockProps } from './block.types.ts'

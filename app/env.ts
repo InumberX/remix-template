@@ -44,9 +44,15 @@ export const APP_PORT = port(process.env.APP_PORT, HMR_PORT + 1)
  * Set per deployment (a commit sha or a build timestamp). generalview derived
  * this from the Vite build time; here it has to come from the environment
  * because there is no build step to bake a value into. Defaults to a fixed
- * `dev` rather than a timestamp so local reloads do not refetch every asset.
+ * `dev` rather than a timestamp so local reloads do not refetch the root
+ * `public/` files.
  */
-export const BUILD_ID = process.env.BUILD_ID ?? 'dev'
+// `||`, not `??`: CI interpolating an unset variable hands over an empty
+// string, which would otherwise produce the cache key `ver=`.
+export const BUILD_ID = process.env.BUILD_ID || 'dev'
+
+/** Whether `BUILD_ID` came from the environment rather than the `dev` fallback. */
+export const HAS_BUILD_ID = Boolean(process.env.BUILD_ID)
 
 /** Absolute origin used to build canonical and og:url values. */
 export const SITE_URL = (process.env.SITE_URL ?? `http://localhost:${PORT}`).replace(/\/$/, '')
@@ -58,15 +64,15 @@ export const NO_INDEX = process.env.NO_INDEX === 'true'
  * Query string, without the `?`. Matches generalview's `ver=...` shape.
  *
  * Files under the root `public/` directory are served by `staticFiles` exactly
- * as they are on disk — no content hash, and no `Cache-Control` header — so a
- * per-deploy query string is what invalidates them in browsers. Append it where
+ * as they are on disk — no content hash, and cached for a day in production
+ * (app/router.ts) — so a per-deploy query string is what invalidates them in
+ * browsers. Append it where
  * the URL is written, keeping the pattern in the type:
  *
  *   `/static/img/img.jpg?${CACHE_BUSTER}`  ->  `/static/img/img.jpg?${string}`
  *
  * Assets served by the asset server (anything under a `public/` directory) do
- * NOT need this: they
- * already carry content-based ETags, and `fingerprint` in app/assets.ts would
- * give them immutable URLs.
+ * NOT need this: they carry content-based ETags, and in production
+ * `fingerprint` in app/assets.ts gives them immutable URLs.
  */
 export const CACHE_BUSTER = `ver=${BUILD_ID}`

@@ -4,7 +4,7 @@
 // a `buttonType`, otherwise an inert tag), the accessibility attributes and the
 // user-agent reset — nothing else. Design decisions belong to the styled tier in
 // `app/ui/<category>/`, which passes them down through `styleOverrides`.
-import { css, type Handle, type MixInput } from 'remix/ui'
+import { css, type Handle, type MixInput } from 'remix/component'
 
 import * as styles from './primitive-button.styles.ts'
 import type { PrimitiveButtonProps } from './primitive-button.types.ts'
