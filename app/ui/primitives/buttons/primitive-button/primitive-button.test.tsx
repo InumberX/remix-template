@@ -1,7 +1,7 @@
 import { describe, it } from 'node:test'
 import * as assert from 'remix/assert'
-import { on } from 'remix/ui'
-import { renderToString } from 'remix/ui/server'
+import { on } from 'remix/component'
+import { renderToString } from 'remix/component/server'
 
 import { PrimitiveButton } from './primitive-button.tsx'
 

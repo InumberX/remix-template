@@ -1,4 +1,4 @@
-import type { SerializableProps } from 'remix/ui'
+import type { SerializableProps } from 'remix/component'
 
 /**
  * Hydrated props must be serializable — they cross from the server render into

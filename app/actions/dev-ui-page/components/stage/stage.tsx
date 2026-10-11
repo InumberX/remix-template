@@ -1,4 +1,4 @@
-import { css, type Handle } from 'remix/ui'
+import { css, type Handle } from 'remix/component'
 
 import * as styles from './stage.styles.ts'
 import type { StageProps } from './stage.types.ts'

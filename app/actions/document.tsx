@@ -1,4 +1,4 @@
-import type { Handle, RemixNode } from 'remix/ui'
+import type { Handle, RemixNode } from 'remix/component'
 
 import { entryHref, entryPreloads } from '../assets.ts'
 import { CACHE_BUSTER } from '../env.ts'

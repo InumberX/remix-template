@@ -1,8 +1,8 @@
 import { readFileSync } from 'node:fs'
 import { describe, it } from 'node:test'
 import * as assert from 'remix/assert'
-import { css } from 'remix/ui'
-import { renderToString } from 'remix/ui/server'
+import { css } from 'remix/component'
+import { renderToString } from 'remix/component/server'
 
 import { getClampPx, getClampRem, getLineClamp, getTransition } from './mixins.ts'
 

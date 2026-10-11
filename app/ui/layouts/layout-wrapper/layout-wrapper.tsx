@@ -3,7 +3,7 @@
 // The decorative background layers and the `isPartner` / `isGlobalMode`
 // variants are dropped: they exist to brand the AUBA partner and global sites
 // and reference images this project does not ship.
-import { css, type Handle, type MixInput } from 'remix/ui'
+import { css, type Handle, type MixInput } from 'remix/component'
 
 import * as styles from './layout-wrapper.styles.ts'
 import type { LayoutWrapperProps } from './layout-wrapper.types.ts'

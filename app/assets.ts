@@ -1,7 +1,7 @@
 import { createAssetServer } from 'remix/assets'
-import { uiHmr } from 'remix/ui-hmr/assets'
+import { componentHmr } from 'remix/component-hmr/assets'
 
-import { BUILD_ID, IS_DEVELOPMENT, IS_NODE_HMR } from './env.ts'
+import { IS_DEVELOPMENT, IS_NODE_HMR } from './env.ts'
 
 const rootDir = process.cwd()
 const isHmr = IS_DEVELOPMENT && IS_NODE_HMR
@@ -18,17 +18,16 @@ export const assets = createAssetServer({
   watch: IS_DEVELOPMENT,
   // Content-based fingerprinting: URLs gain a `.@<hash>` segment and are served
   // `public, max-age=31536000, immutable`, so a returning browser issues no
-  // request at all for an unchanged module. It assumes files on disk do not
-  // change, hence the `watch: false` it requires — development keeps the
+  // request at all for an unchanged module. The hash comes from the emitted
+  // module alone, so an unchanged file keeps its URL across deploys and every
+  // instance agrees on it without sharing any id. It assumes files on disk do
+  // not change, hence the `watch: false` it requires — development keeps the
   // default stable URLs with `no-cache` + ETag instead.
-  //
-  // Every instance must share the same BUILD_ID or they hand out different
-  // URLs for the same file and split the cache.
-  fingerprint: IS_DEVELOPMENT ? undefined : { buildId: BUILD_ID },
+  fingerprint: !IS_DEVELOPMENT,
   hmr: isHmr
     ? async () => (await import('remix/node-hmr/runtime')).createBrowserHmrChannel()
     : undefined,
-  scripts: { loaders: isHmr ? [uiHmr()] : undefined },
+  scripts: { loaders: isHmr ? [componentHmr()] : undefined },
 })
 
 const entry = 'app/actions/public/entry.ts'

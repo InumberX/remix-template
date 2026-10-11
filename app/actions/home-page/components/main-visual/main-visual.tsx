@@ -1,4 +1,4 @@
-import { css } from 'remix/ui'
+import { css } from 'remix/component'
 
 import { CACHE_BUSTER } from '../../../../env.ts'
 import { LayoutInner } from '../../../../ui/layouts/layout-inner/layout-inner.tsx'

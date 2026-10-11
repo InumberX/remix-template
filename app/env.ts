@@ -44,7 +44,8 @@ export const APP_PORT = port(process.env.APP_PORT, HMR_PORT + 1)
  * Set per deployment (a commit sha or a build timestamp). generalview derived
  * this from the Vite build time; here it has to come from the environment
  * because there is no build step to bake a value into. Defaults to a fixed
- * `dev` rather than a timestamp so local reloads do not refetch every asset.
+ * `dev` rather than a timestamp so local reloads do not refetch the root
+ * `public/` files.
  */
 export const BUILD_ID = process.env.BUILD_ID ?? 'dev'
 
@@ -65,8 +66,7 @@ export const NO_INDEX = process.env.NO_INDEX === 'true'
  *   `/static/img/img.jpg?${CACHE_BUSTER}`  ->  `/static/img/img.jpg?${string}`
  *
  * Assets served by the asset server (anything under a `public/` directory) do
- * NOT need this: they
- * already carry content-based ETags, and `fingerprint` in app/assets.ts would
- * give them immutable URLs.
+ * NOT need this: they carry content-based ETags, and in production
+ * `fingerprint` in app/assets.ts gives them immutable URLs.
  */
 export const CACHE_BUSTER = `ver=${BUILD_ID}`
