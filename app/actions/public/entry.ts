@@ -1,23 +1,28 @@
 import { run } from 'remix/component'
+import {
+  detectMultipleImportMapSupport,
+  importModule,
+  preloadShim,
+} from 'remix/multiple-import-maps-polyfill'
 
+// Client entries discovered after the first paint can bring their own import
+// maps. `importModule` and `preloadShim` resolve through every map in the
+// document on browsers that do not support multiple import maps natively.
+// Frames use the runtime's default `resolveFrame`.
 const app = run({
   async loadModule(moduleUrl, exportName) {
-    const mod = await import(moduleUrl)
-    return mod[exportName]
-  },
-  async resolveFrame(src, options) {
-    const response = await fetch(src, {
-      headers: { Accept: 'text/html' },
-      method: options?.method,
-      body: getRequestBody(options?.formData, options?.method, options?.encType),
-      signal: options?.signal,
-    })
-    if (!response.ok) {
-      return `<pre>Frame error: ${response.status} ${response.statusText}</pre>`
+    const mod = await importModule(moduleUrl)
+    const Component = mod[exportName]
+    if (typeof Component !== 'function') {
+      throw new Error(`Unknown component: ${moduleUrl}#${exportName}`)
     }
+    return Component
+  },
+  async processClientEntryPreloads(preloads) {
+    if (await detectMultipleImportMapSupport()) return preloads
 
-    if (response.body) return response.body
-    return await response.text()
+    preloadShim(preloads)
+    return []
   },
 })
 
@@ -30,19 +35,4 @@ if (import.meta.hot) {
       console.error('Error reloading top frame on server update', error)
     }
   })
-}
-
-const getRequestBody = (
-  formData?: FormData,
-  method?: string,
-  encType?: string
-): BodyInit | undefined => {
-  if (!formData || method?.toLowerCase() === 'get') return
-  if (encType !== 'application/x-www-form-urlencoded') return formData
-
-  const body = new URLSearchParams()
-  for (const [name, value] of formData) {
-    body.append(name, typeof value === 'string' ? value : value.name)
-  }
-  return body
 }

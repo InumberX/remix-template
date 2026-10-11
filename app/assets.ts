@@ -25,12 +25,14 @@ export const assets = createAssetServer({
   // default stable URLs with `no-cache` + ETag instead.
   fingerprint: !IS_DEVELOPMENT,
   hmr: isHmr
-    ? async () => (await import('remix/node-hmr/runtime')).createBrowserHmrChannel()
+    ? {
+        channel: async () => (await import('remix/node-hmr/runtime')).createBrowserHmrChannel(),
+        moduleImporter: 'remix/multiple-import-maps-polyfill',
+      }
     : undefined,
   scripts: { loaders: isHmr ? [componentHmr()] : undefined },
 })
 
 const entry = 'app/actions/public/entry.ts'
 
-export const entryHref = await assets.getHref(entry)
-export const entryPreloads = await assets.getPreloads(entry)
+export const scriptEntry = await assets.getScriptEntry(entry)

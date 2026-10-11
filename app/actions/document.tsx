@@ -1,6 +1,7 @@
 import type { Handle, RemixNode } from 'remix/component'
+import { ImportMap } from 'remix/component/server'
 
-import { entryHref, entryPreloads } from '../assets.ts'
+import { scriptEntry } from '../assets.ts'
 import { CACHE_BUSTER } from '../env.ts'
 import { LayoutWrapper } from '../ui/layouts/layout-wrapper/layout-wrapper.tsx'
 import { type PageMeta, renderMeta, resolveTitle } from './meta.tsx'
@@ -42,10 +43,11 @@ export function Document(handle: Handle<DocumentProps>) {
           <title>{resolveTitle(meta)}</title>
           {renderMeta(meta, url)}
           {head}
-          {entryPreloads.map((href) => (
+          <ImportMap value={scriptEntry.importMap} />
+          {scriptEntry.preloads.map((href) => (
             <link key={href} rel="modulepreload" href={href} />
           ))}
-          <script type="module" src={entryHref}></script>
+          <script type="module" src={scriptEntry.href}></script>
         </head>
         <body>
           <LayoutWrapper>{children}</LayoutWrapper>

@@ -4,18 +4,11 @@ import { createRequestListener } from 'remix/node-fetch-server'
 import { HMR_PROXY_PORT, IS_NODE_HMR, PORT } from './app/env.ts'
 import { router } from './app/router.ts'
 
-const server = http.createServer(
-  createRequestListener(async (request) => {
-    try {
-      return await router.fetch(request)
-    } catch (error) {
-      if (!(request.signal.aborted && error === request.signal.reason)) {
-        console.error(error)
-      }
-      return new Response('Internal Server Error', { status: 500 })
-    }
-  })
-)
+// The listener's default `onError` logs and answers a generic 500, and it
+// drops errors that are only the request's own abort reason. Under `npm run
+// hmr` the request arrives through the fetch proxy, so trust its forwarded
+// headers there to keep `request.url` on the public origin.
+const server = http.createServer(createRequestListener(router.fetch, { trustProxy: IS_NODE_HMR }))
 
 server.listen(PORT, () => {
   if (IS_NODE_HMR) {
