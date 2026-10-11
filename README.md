@@ -1,6 +1,6 @@
 # Remix template
 
-[Remix 3](https://remix.run)（`3.0.0-rc.1`）のスターターテンプレートです。サーバーファーストで、Web 標準の `Request` / `Response` の上に構築されています。
+[Remix 3](https://remix.run)（`3.0.0`）のスターターテンプレートです。サーバーファーストで、Web 標準の `Request` / `Response` の上に構築されています。
 
 - **ビルドステップがありません。** TypeScript は `remix/node-tsx` の import フックで実行時に読み込まれ、ブラウザ向けモジュールはアセットサーバーがオンデマンドでコンパイルします。
 - **URL の単一の情報源。** `app/routes.ts` がルート契約を持ち、`href()` の引数と `context.params` はパターンのリテラル型から導出されます。
@@ -9,7 +9,7 @@
 
 ## 必要環境
 
-Node.js **24.3.0 以上**（`.node-version` は 24.11.1 を固定）。`remix/node-tsx` が `module.registerHooks` を使うためで、これより古いランタイムでは `remix` CLI も含めて全てのコマンドが失敗します。
+Node.js **24.3.0 以上**（`.node-version` と `volta` は 24.16.0 を固定）。`remix/node-tsx` が `module.registerHooks` を使うためで、これより古いランタイムでは `remix` CLI も含めて全てのコマンドが失敗します。
 
 ## セットアップ
 
@@ -73,7 +73,7 @@ public/
   favicon.svg
   static/css/app.css            カスケードレイヤーの順序・リセット・トークン
   static/img/
-server.ts                       node:http + createRequestListener
+server.ts                       node:http + createRequestListener(router.fetch)
 hmr.ts                          HMR プロキシと子プロセスの管理
 ```
 
@@ -195,7 +195,7 @@ export const ExampleCopyButton = clientEntry(
 
 - 渡すのは**名前付き関数**です。アロー関数だと `clientEntry` がエクスポート名を取得できず、描画時に例外になります（typecheck・lint・テストは通ってしまいます）。
 - **ハイドレートするコンポーネントは実行時の依存を全て `public/` の内側に置きます。** `app/assets.ts` が許可するのは `app/routes.ts` と `app/**/public/**` だけで、値のインポートが外に出るとブラウザビルドが `IMPORT_NOT_ALLOWED` で失敗します。型のみのインポートは消えるため対象外です。
-- props はシリアライズ可能で、`SerializableProps` を継承している必要があります。
+- props はシリアライズ可能である必要があります。`clientEntry` のシグネチャ自体がこれを検査するので、関数などを渡すと型エラーになります。
 
 実例は `app/actions/dev-ui-page/public/components/example-copy-button/` です。`Example` 接頭辞は「テンプレートの参考資料であり、そのまま使うものではない」ことを示します。
 
@@ -209,7 +209,7 @@ export const ExampleCopyButton = clientEntry(
 | `PORT` | `44100` | 公開ポート |
 | `HMR_PORT` | `PORT + 1` | ブラウザ HMR のイベントチャンネル |
 | `APP_PORT` | `HMR_PORT + 1` | HMR プロキシ配下の子サーバー |
-| `BUILD_ID` | `dev` | アセットのフィンガープリントと `CACHE_BUSTER` |
+| `BUILD_ID` | `dev` | `CACHE_BUSTER`（ルート `public/` の参照に付けるクエリ） |
 | `SITE_URL` | `http://localhost:${PORT}` | canonical / og:url の絶対 URL |
 | `NO_INDEX` | `false` | `true` で `noindex, nofollow` を強制 |
 
@@ -217,16 +217,16 @@ export const ExampleCopyButton = clientEntry(
 
 ビルドがないため、キャッシュ識別子は 2 層とも実行時に決まります。どちらも本番のみ有効で、開発中は常に `no-cache` です。
 
-- **アセットサーバー（`/assets/*`）** — `fingerprint: { buildId: BUILD_ID }` がコンテンツハッシュを URL に挿入し（`entry.@r2O3W4.ts`）、`public, max-age=31536000, immutable` で配信します。ハッシュはファイル内容と build id から作られるため、デプロイで URL が変わるのは実際に変更されたモジュールだけです。ファイルが変化しない前提なので `watch: false` が必須で、開発では無効にしています。
+- **アセットサーバー（`/assets/*`）** — 本番では `fingerprint: true` がコンテンツハッシュを URL に挿入し（`entry.@PlFVt_.ts`）、`public, max-age=31536000, immutable` で配信します。ハッシュは出力されたモジュールの内容だけから作られるため、デプロイで URL が変わるのは実際に変更されたモジュールだけで、インスタンス間で何かを共有する必要もありません。ページは安定 URL を参照し、`document.tsx` が描画する `<ImportMap>` がそれをハッシュ付き URL に対応付けます。ファイルが変化しない前提なので `watch: false` が必須で、開発では無効にしています。
 - **ルートの `public/`（`staticFiles`）** — 本番は `public, max-age=86400`。URL が固定なので `immutable` にはしません。アプリから参照するファイルは `?${CACHE_BUSTER}` を付けてデプロイごとに更新し、`favicon.svg` のように直接取得されるものは ETag の再検証に任せます。
 
-**全インスタンスで `BUILD_ID` を共有してください。** 値が違うと同じ内容に別の URL が割り当てられ、キャッシュが分断されます。既定値が `dev` なので、CI からコミット SHA を渡さないとデプロイしても何も無効化されません。
+**全インスタンスで `BUILD_ID` を共有してください。** 現在の用途は `CACHE_BUSTER` だけですが、値が違うと同じ `app.css` に別の URL が割り当てられ、キャッシュが分断されます。既定値が `dev` なので、CI からコミット SHA を渡さないとデプロイしてもルート `public/` のファイルは無効化されません。
 
 ## テスト
 
 テストは対象の隣に置きます（`app/actions/controller.test.tsx`、`app/ui/**/<name>.test.tsx`）。`app/assets.ts` の `denyFiles: ['app/**/*.test.*']` があるため、隣接していてもブラウザから到達することはありません。
 
-**`remix/test` ではなく `node:test` で書いてください。** `test` スクリプトは素の `node --test` で、`remix/test` で登録したスイートは読み込まれるだけでアサーションが実行されず、それでも成功として報告されます（`remix test` ランナーには playwright が必要です）。`describe` / `it` は `node:test` から、アサーションは `import * as assert from 'remix/assert'` の名前空間インポートで取り込みます。
+**`remix/test` ではなく `node:test` で書いてください。** `test` スクリプトは素の `node --test` で、`remix/test` で登録したスイートは読み込まれるだけでアサーションが実行されず、それでも成功として報告されます。3.0.0 の `remix test` ランナーはサーバー・コンポーネントのテストなら Playwright なしで動くので移行は可能になりましたが、`test` スクリプトを切り替えるまでは `node:test` を使ってください。`describe` / `it` は `node:test` から、アサーションは `import * as assert from 'remix/assert'` の名前空間インポートで取り込みます。
 
 ルートの挙動は `router.fetch(new Request(...))` の `Response` に対して、コンポーネントは `renderToString` で検証します。
 
@@ -289,5 +289,5 @@ Node のバージョンは `actions/setup-node` の `node-version-file` で `.no
 
 - `AGENTS.md` — スターター構成とルート所有権の規約。
 - `CLAUDE.md` — 実測から得た規約と落とし穴の記録。
-- `.agents/skills/remix/SKILL.md` — Remix 3 のビルドガイド。トピック別の詳細は `.agents/skills/remix/references/<topic>.md`。
-- `remix/<subpath>` の API ドキュメントは `node_modules/remix/src/<dir>/README.md`（ディレクトリ名は必ずしもサブパス名と一致しません。例: `remix/router` → `src/fetch-router/README.md`）。
+- `.agents/skills/remix/SKILL.md` — Remix 3 のメンタルモデルとドキュメントの探し方。3.0.0 の `remix new` が生成するものをそのまま置いています（次のバージョンで差分を取り込みやすくするため）。
+- `node_modules/remix/INDEX.md` — インストール済みドキュメントの索引。タスクやエクスポート名で検索し、`node_modules/remix/guides/` のガイド、次にパッケージの README を読みます（README のディレクトリ名は必ずしもサブパス名と一致しません。例: `remix/router` → `src/fetch-router/README.md`）。

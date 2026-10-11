@@ -5,8 +5,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Read First
 
 - `AGENTS.md` — starter layout and route-ownership conventions.
-- `.agents/skills/remix/SKILL.md` — the Remix 3 build guide (project layout, placement precedence, core rules, package map, canonical patterns). Load `.agents/skills/remix/references/<topic>.md` only for the topic you are touching; each reference opens with a "What This Covers" section.
-- Full API docs for a `remix/<subpath>` live in `node_modules/remix/src/<dir>/README.md`. The directory name is not always the subpath name (`remix/router` → `src/fetch-router/README.md`); fall back to the nearest parent README.
+- `.agents/skills/remix/SKILL.md` — the Remix 3 mental model and how to find documentation. It is the file `remix new` generates for 3.0.0, kept verbatim so a later version can be diffed in; this project's own layout rules live in `AGENTS.md` and here, not in the skill.
+- `node_modules/remix/INDEX.md` — the installed documentation index. Search it by task or export (`grep -i session node_modules/remix/INDEX.md`), read the matching guide under `node_modules/remix/guides/`, then the package README for exact APIs. The README directory is not always the subpath name (`remix/router` → `src/fetch-router/README.md`); the index maps them.
 
 ## Commands
 
@@ -36,9 +36,9 @@ NODE_ENV=test node --import remix/node-tsx --test --test-name-pattern 'renders h
 
 There is no build step — TypeScript is loaded at runtime through the `remix/node-tsx` import hook, and browser modules are compiled on demand by the asset server.
 
-**Node version.** `.node-version` pins 24.11.1 and `package.json` requires `>=24.3.0`, because `remix/node-tsx` calls `module.registerHooks`. On an older runtime every `node --import remix/node-tsx` command fails with `does not provide an export named 'registerHooks'`, and the `remix` CLI cannot load `app/routes.ts` at all. `oxlint`, `oxfmt`, and `tsc` are standalone binaries and work regardless. If `node -v` disagrees with `.node-version`, a hardcoded version directory is shadowing the nodenv shims on `PATH`.
+**Node version.** `.node-version` pins 24.16.0 (the same as `volta` in `package.json`) and `package.json` requires `>=24.3.0`, because `remix/node-tsx` calls `module.registerHooks`. On an older runtime every `node --import remix/node-tsx` command fails with `does not provide an export named 'registerHooks'`, and the `remix` CLI cannot load `app/routes.ts` at all. `oxlint`, `oxfmt`, and `tsc` are standalone binaries and work regardless. If `node -v` disagrees with `.node-version`, a hardcoded version directory is shadowing the nodenv shims on `PATH`.
 
-**Write tests with `node:test`, not `remix/test`.** The `test` script is plain `node --test`, which never runs a suite registered through `remix/test` — the file is imported, the assertions never execute, and it still reports a pass. `remix/test` only works under the `remix test` runner, which needs `playwright` installed. So until that runner is set up, import `describe`/`it` from `node:test` and pair it with `import * as assert from 'remix/assert'` (the namespace import is what carries `assert.match`; the *named* `assert` export is only the bare callable).
+**Write tests with `node:test`, not `remix/test`.** The `test` script is plain `node --test`, which never runs a suite registered through `remix/test` — the file is imported, the assertions never execute, and it still reports a pass. `remix/test` only works under the `remix test` runner. Since 3.0.0 that runner handles server and component tests without Playwright (only `*.test.browser.*` / `*.test.e2e.*` need it), so moving the suite onto it is now possible — but it is a separate change: until the `test` script is switched, import `describe`/`it` from `node:test` and pair it with `import * as assert from 'remix/assert'` (the namespace import is what carries `assert.match`; the *named* `assert` export is only the bare callable).
 
 The `test` script passes explicit globs because Node's default discovery pattern covers `.ts` but **not** `.tsx` — without them only `app/env.test.ts` runs, and the suite reports a green 2 tests instead of 20.
 
@@ -174,7 +174,7 @@ Upper bounds are written as exclusive (`width < ${BREAKPOINTS.md}px`), which Med
 
 **Route-owned UI never goes here.** generalview's `components/pages/*` and `components/features/*` map onto `app/actions/<route-key>/`, next to the controller that owns them. `app/ui/` is only for UI that more than one route area needs.
 
-**Derive DOM types where Remix pins them, hand-declare only deliberate narrowings.** `remix/ui` does not re-export its internal DOM types (`AriaRole`, `HTMLAttributeAnchorTarget`), so the JSX namespace is the supported seam: `NonNullable<JSX.IntrinsicElements['button']['type']>` is a real union and rejects `'nope'`, while `<a target>` and `<a rel>` stay open to arbitrary strings and must be narrowed by hand in `app/ui/types/dom.ts`. Note also that Remix constrains `role` per element following ARIA-in-HTML, unlike React's uniformly wide `AriaRole` — a component that renders several element types can only accept the intersection (see `PrimitiveButtonRole`).
+**Derive DOM types where Remix pins them, hand-declare only deliberate narrowings.** `remix/component` does not re-export its internal DOM types (`AriaRole`, `HTMLAttributeAnchorTarget`), so the JSX namespace is the supported seam: `NonNullable<JSX.IntrinsicElements['button']['type']>` is a real union and rejects `'nope'`, while `<a target>` and `<a rel>` stay open to arbitrary strings and must be narrowed by hand in `app/ui/types/dom.ts`. Note also that Remix constrains `role` per element following ARIA-in-HTML, unlike React's uniformly wide `AriaRole` — a component that renders several element types can only accept the intersection (see `PrimitiveButtonRole`).
 
 Nothing in `app/ui/styles/` may import a component.
 
@@ -216,11 +216,11 @@ There is no PostCSS here. `@mixin`, `@custom-media` and `@media (--name)` are Po
 
 There is no build, so nothing produces hashed filenames up front. Both layers get their cache identity at runtime, and both are production-only — development keeps `no-cache` everywhere so an edit is always picked up.
 
-**Asset server (`/assets/*`).** `fingerprint: { buildId: BUILD_ID }` in `app/assets.ts` inserts a content hash (`entry.@r2O3W4.ts`) and serves `public, max-age=31536000, immutable`, so a returning browser issues no request at all. The hash is derived from file contents plus the build id, which has two consequences: the same `BUILD_ID` always yields the same URL, and a deploy only changes the URLs of modules that actually changed — unlike a bundler, where one edit invalidates a whole chunk. Fingerprinting assumes files on disk are stable, so it requires `watch: false`; that is why it is disabled in development.
+**Asset server (`/assets/*`).** `fingerprint: true` (production only) in `app/assets.ts` inserts a content hash (`entry.@PlFVt_.ts`) and serves `public, max-age=31536000, immutable`, so a returning browser issues no request at all. The hash is derived from the emitted module alone, so a deploy only changes the URLs of modules that actually changed — unlike a bundler, where one edit invalidates a whole chunk — and every instance computes the same URL without sharing anything. Pages keep referencing the stable URL; the `<ImportMap>` that `document.tsx` renders from `scriptEntry.importMap` maps it to the fingerprinted one. Fingerprinting assumes files on disk are stable, so it requires `watch: false`; that is why it is disabled in development.
 
 **Root `public/` (`staticFiles`).** `app/router.ts` sets `public, max-age=86400` in production. Not `immutable`, because these URLs are fixed: files the app references carry `?${CACHE_BUSTER}` and rotate per deploy, but `favicon.svg` and anything else fetched directly does not. A day plus ETag revalidation is correct for both.
 
-**Every instance must share one `BUILD_ID`.** Different values hand out different URLs for the same bytes and split the cache. `BUILD_ID` falls back to `'dev'`, so a deploy that forgets to set it will not invalidate anything — pass the commit sha from CI.
+**Every instance must share one `BUILD_ID`.** It now only feeds `CACHE_BUSTER`, but different values still hand out different `app.css` URLs for the same bytes and split the cache. `BUILD_ID` falls back to `'dev'`, so a deploy that forgets to set it will not invalidate root `public/` files — pass the commit sha from CI.
 
 Measured on this app: a cold first visit is 46 requests / ~338 KB, because modules are served individually rather than bundled. With the settings above a warm visit issues none of them.
 
@@ -272,36 +272,36 @@ There is no `deploy.yml` — no deploy target is configured yet. The labelling w
 
 ## Architecture
 
-Remix 3 (`remix@3.0.0-rc.1`), server-first, built on Web `Request`/`Response`. Everything imports from a `remix/<subpath>`; there is no top-level `remix` import.
+Remix 3 (`remix@3.0.0`), server-first, built on Web `Request`/`Response`. Everything runtime imports from a `remix/<subpath>`. The top-level `remix` module exists only as the augmentation target for `RouterTypes`.
 
-Request flow: `server.ts` (`node:http` + `createRequestListener`) → `router.fetch(request)` → middleware stack in `app/router.ts` (`staticFiles('./public')` then `render({ assets })`) → the controller mapped for the matched route → a `Response`.
+Request flow: `server.ts` (`node:http` + `createRequestListener(router.fetch)`, whose default `onError` logs and answers 500) → `router.fetch(request)` → middleware stack in `app/router.ts` (`staticFiles('./public')` then `render({ assets })`) → the controller mapped for the matched route → a `Response`.
 
 The four pieces that must stay in sync:
 
 - **`app/routes.ts`** — the single source of truth for URLs, shared by server and browser. Add routes here before wiring anything else, and build every internal URL with `routes.<name>.href(...)` rather than a string literal.
-- **`app/router.ts`** — builds the middleware stack, derives `AppContext` from it via `MiddlewareContext<[...]>`, publishes that type through `declare module 'remix/router'`, then calls `router.map(routes, controller)`. `router.map` wires only *direct leaf* routes; each nested route map needs its own `router.map(routes.<key>, controller)` line and its own `app/actions/<route-key>/controller.tsx`.
+- **`app/router.ts`** — builds the middleware stack, derives `AppContext` from it via `MiddlewareContext<[...]>`, publishes that type through `declare module 'remix'`, then calls `router.map(routes, controller)`. `router.map` wires only *direct leaf* routes; each nested route map needs its own `router.map(routes.<key>, controller)` line and its own `app/actions/<route-key>/controller.tsx`.
 - **`app/actions/controller.tsx`** — `createController(routes, { actions })`, one action per leaf route key. Actions return `Response` objects; UI responses go through `context.render(<Node />)`, which the `render()` middleware provides.
 - **`app/env.ts`** — the only module that reads `process.env`. Everything else imports the resolved constants (`NODE_ENV`, `IS_PRODUCTION`, `PORT`, `HMR_PORT`, `APP_PORT`, `BUILD_ID`, `CACHE_BUSTER`, `SITE_URL`, `NO_INDEX`). The port topology lives here because `server.ts` and `hmr.ts` must agree on it. The one exception is the `...process.env` spread in `hmr.ts`, which hands the whole environment to the child process rather than reading a variable.
 - **`app/ui/`** — shared cross-route UI, organized by category (see "The `app/ui/` layout" below).
-- **`app/assets.ts`** — the browser asset pipeline. `createAssetServer` serves `/assets/*` (routed through the `assets` action in the controller) and gates what can be compiled for the browser via `allowFiles` (`app/routes.ts` and `app/**/public/**`) and `allowPackages`. It computes `entryHref`/`entryPreloads` with top-level `await`, which resolves the entry's dependency graph before the server listens and which `app/actions/document.tsx` injects into `<head>`. A browser module that lives outside a `public/` directory will not compile — put it under the narrowest owner's `public/`.
+- **`app/assets.ts`** — the browser asset pipeline. `createAssetServer` serves `/assets/*` (routed through the `assets` action in the controller) and gates what can be compiled for the browser via `allowFiles` (`app/routes.ts` and `app/**/public/**`) and `allowPackages`. It computes `scriptEntry` (`href`, `importMap`, `preloads`) with `getScriptEntry()` and top-level `await`, which resolves the entry's dependency graph before the server listens; `app/actions/document.tsx` renders the `<ImportMap>`, the preloads and the `<script>` into `<head>`. A browser module that lives outside a `public/` directory will not compile — put it under the narrowest owner's `public/`.
 
-Development vs. HMR: `npm run dev` runs `server.ts` directly. `npm run hmr` runs `hmr.ts`, which owns the public port and supervises a child `server.ts` (extra `--import remix/ui-hmr/node`) behind `createFetchProxy`. `app/assets.ts` only enables the browser HMR channel and the `uiHmr()` script loader when `REMIX_NODE_HMR` is set by that runner.
+Development vs. HMR: `npm run dev` runs `server.ts` directly. `npm run hmr` runs `hmr.ts`, which owns the public port and supervises a child `server.ts` (extra `--import remix/component-hmr/node`) behind `createFetchProxy`; `server.ts` sets `trustProxy` there so `request.url` keeps the public origin. `app/assets.ts` only enables the browser HMR channel and the `componentHmr()` script loader when `REMIX_NODE_HMR` is set by that runner.
 
 ## Code Conventions
 
 - TypeScript imports carry their real extension (`./routes.ts`, `./home-page.tsx`) — `allowImportingTsExtensions` plus `verbatimModuleSyntax` are on.
 - **Functions are `const` arrows; components are `function` declarations.** A component is anything used as `<X />` — a helper that merely returns a `RemixNode` (`renderMeta()`) stays a `const`. Three reasons for the exception: it is the form Remix's own docs and the skill use, so pasted examples fit; hoisting lets a file lead with its main component and put sub-components after it; and `clientEntry` reads the function's name to know which export to hydrate.
 - **Types are `type`, except inside `declare module`.** Module augmentation needs declaration merging, which only `interface` has — `app/router.ts` publishes `AppContext` through `interface RouterTypes`, and turning it into a `type` deletes `context.render` from every controller.
-- JSX compiles through `jsxImportSource: "remix/ui"`. **Remix components are not React**: write `function Name(handle: Handle<Props>) { return () => <jsx/> }`, read props from `handle.props`, keep state in setup-scope variables, and call `handle.update()` explicitly to re-render. There are no hooks and no implicit rerendering.
+- JSX compiles through `jsxImportSource: "remix/component"`. **Remix components are not React**: write `function Name(handle: Handle<Props>) { return () => <jsx/> }`, read props from `handle.props`, keep state in setup-scope variables, and call `handle.update()` explicitly to re-render. There are no hooks and no implicit rerendering.
 - Styling and behavior attach to host elements through the `mix` prop: `mix={css({...})}`, `mix={on('click', handler)}`, `mix={[styleA, styleB]}` to compose. Keep one-off styles inline; hoist a module-scoped `css(...)` descriptor once it is a reused recipe or large enough to obscure the component.
-- Hydrate only where the browser is genuinely needed. `clientEntry(import.meta.url, Component)` (see `app/actions/dev-ui-page/public/components/example-copy-button/`) hydrates one island while the rest of the page stays static HTML; its props must be serializable and extend `SerializableProps`. Get the server-rendered response right before layering interactivity on top.
+- Hydrate only where the browser is genuinely needed. `clientEntry(import.meta.url, Component)` (see `app/actions/dev-ui-page/public/components/example-copy-button/`) hydrates one island while the rest of the page stays static HTML; its props must be serializable, which `clientEntry`'s own signature enforces — a function prop makes the `clientEntry(...)` call a type error. Get the server-rendered response right before layering interactivity on top.
 
   Pass a **named function**, not an arrow. `clientEntry` needs the export name and otherwise throws `clientEntry() requires either an export name in the entry ID … or a named component function` at render time — green typecheck, green lint, green tests. The documented alternative, `` `${import.meta.url}#PromptButton` ``, works but puts the export name in a string no rename refactor touches: a stale one still renders and still typechecks, and only hydration in the browser breaks.
-- `app/actions/public/entry.ts` is the browser runtime entry (`run(...)` from `remix/ui`) referenced by `app/assets.ts`.
+- `app/actions/public/entry.ts` is the browser runtime entry (`run(...)` from `remix/component`) referenced by `app/assets.ts`. It loads client entries through `remix/multiple-import-maps-polyfill` and uses the runtime's default `resolveFrame`.
 
 ## Growing This App
 
-Follow the placement precedence in the skill: narrowest owner first, then `app/ui/` for cross-route UI, `app/middleware/` for lifecycle concerns, `app/data/` for schema and persistence, `app/utils/` only as a last resort. Do not create `app/lib/`, `app/components/`, or `app/controllers/`.
+Follow the placement precedence in `AGENTS.md`: narrowest owner first, then `app/ui/` for cross-route UI, `app/middleware/` for lifecycle concerns, `app/data/` for schema and persistence, `app/utils/` only as a last resort. Do not create `app/lib/`, `app/components/`, or `app/controllers/`.
 
 `app/` top level is for single-instance, app-wide contracts that no narrower owner can hold — `routes.ts`, `router.ts`, `assets.ts`, `env.ts`. Note that only `app/routes.ts` is allow-listed for the browser; everything else at that level is server-only.
 
