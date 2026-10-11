@@ -1,5 +1,5 @@
-import { describe, it } from 'node:test'
 import * as assert from 'remix/assert'
+import { describe, it } from 'remix/test'
 
 import * as styles from './example-copy-button.styles.ts'
 

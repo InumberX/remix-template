@@ -1,6 +1,6 @@
-import { describe, it } from 'node:test'
 import * as assert from 'remix/assert'
 import { renderToString } from 'remix/component/server'
+import { describe, it } from 'remix/test'
 
 import { PrimitiveButton } from '../../primitives/buttons/primitive-button/primitive-button.tsx'
 import { BaseButton } from './base-button.tsx'

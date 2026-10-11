@@ -14,7 +14,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 npm run dev         # watch-mode server on :44100 (gallery at /dev/ui)
 npm run hmr         # HMR proxy on :44100 -> child server on :44102 (HMR events :44101)
 npm run start       # production server
-npm test            # node --test over the whole project
+npm test            # remix test over the whole project (server runner)
 npm run typecheck   # tsc -b (incremental, writes tsconfig.tsbuildinfo)
 npm run routes      # remix routes --table (inspect the route contract)
 npm run doctor      # remix doctor (project health check)
@@ -30,17 +30,19 @@ npm run pre-commit  # typecheck -> format-fix -> lint-fix -> stylelint-fix
 Run a single test file or filter by name:
 
 ```sh
-NODE_ENV=test node --import remix/node-tsx --test app/actions/controller.test.tsx
-NODE_ENV=test node --import remix/node-tsx --test --test-name-pattern 'renders home'
+npm test -- app/actions/controller.test.tsx
+npm test -- --only 'renders the home page'
 ```
 
 There is no build step — TypeScript is loaded at runtime through the `remix/node-tsx` import hook, and browser modules are compiled on demand by the asset server.
 
 **Node version.** `.node-version` pins 24.16.0 (the same as `volta` in `package.json`) and `package.json` requires `>=24.3.0`, because `remix/node-tsx` calls `module.registerHooks`. On an older runtime every `node --import remix/node-tsx` command fails with `does not provide an export named 'registerHooks'`, and the `remix` CLI cannot load `app/routes.ts` at all. `oxlint`, `oxfmt`, and `tsc` are standalone binaries and work regardless. If `node -v` disagrees with `.node-version`, a hardcoded version directory is shadowing the nodenv shims on `PATH`.
 
-**Write tests with `node:test`, not `remix/test`.** The `test` script is plain `node --test`, which never runs a suite registered through `remix/test` — the file is imported, the assertions never execute, and it still reports a pass. `remix/test` only works under the `remix test` runner. Since 3.0.0 that runner handles server and component tests without Playwright (only `*.test.browser.*` / `*.test.e2e.*` need it), so moving the suite onto it is now possible — but it is a separate change: until the `test` script is switched, import `describe`/`it` from `node:test` and pair it with `import * as assert from 'remix/assert'` (the namespace import is what carries `assert.match`; the *named* `assert` export is only the bare callable).
+**Write tests with `remix/test`, never `node:test`.** The `test` script is `remix test`, which discovers `**/*.test.{ts,tsx}` for its server runner (both extensions, so no explicit globs are needed) and loads TypeScript itself. Import `describe`/`it` from `remix/test` and pair them with `import * as assert from 'remix/assert'` (the namespace import is what carries `assert.match`; the *named* `assert` export is only the bare callable).
 
-The `test` script passes explicit globs because Node's default discovery pattern covers `.ts` but **not** `.tsx` — without them only `app/env.test.ts` runs, and the suite reports a green 2 tests instead of 20.
+A `node:test` suite is the trap in the other direction: `remix test` imports the file and `node:test` prints its failure, but the run still reports only the `remix/test` results and exits 0 — measured with a deliberately failing `assert.equal(1, 2)`. `.oxlintrc.json` therefore bans `node:test` through `no-restricted-imports`. The test context has no `t.skip()`; skip conditionally with the `{ skip: <reason> }` option, as `app/env.test.ts` does.
+
+Browser and end-to-end runners (`*.test.browser.*`, `*.test.e2e.*`) need `playwright` installed; nothing here uses them yet.
 
 ## Routes and actions
 
@@ -182,7 +184,7 @@ Nothing in `app/ui/styles/` may import a component.
 
 Co-locate tests beside what they test, one per component directory — `app/actions/controller.test.tsx`, `app/ui/**/<name>/<name>.test.tsx`, `app/env.test.ts`. The framework assumes this: `app/assets.ts` carries `denyFiles: ['app/**/*.test.*']` specifically so co-located tests are never browser-reachable, and the CLI discovers by filename pattern rather than location. Root `test/` is reserved for what the skill scopes it to — shared helpers, fixtures, and integration/E2E coverage — and does not exist yet.
 
-Drive route behavior with `router.fetch(new Request(...))` and assert on the `Response`; use `renderToString` for component specimens. See the note in **Commands** about `node:test` vs `remix/test`.
+Drive route behavior with `router.fetch(new Request(...))` and assert on the `Response`; use `renderToString` for component specimens. See the note in **Commands** about `remix/test` vs `node:test`.
 
 ## Global CSS
 

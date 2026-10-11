@@ -8,7 +8,7 @@
     "upgrade": "npx npm-check-updates -u",
     "upgrade-check": "npx npm-check-updates",
     "start": "NODE_ENV=production node --import remix/node-tsx server.ts",
-    "test": "NODE_ENV=test node --import remix/node-tsx --test \"app/**/*.test.ts\" \"app/**/*.test.tsx\"",
+    "test": "NODE_ENV=test remix test",
     "typecheck": "tsc -b",
     "routes": "remix routes --table",
     "doctor": "remix doctor",

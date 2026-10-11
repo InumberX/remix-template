@@ -27,7 +27,7 @@ http://localhost:44100 が開発サーバー、http://localhost:44100/dev/ui が
 | `npm run dev` | ウォッチモードのサーバー（:44100） |
 | `npm run hmr` | HMR プロキシ（:44100 → 子サーバー :44102、HMR イベント :44101） |
 | `npm run start` | 本番サーバー |
-| `npm test` | `node --test` によるテスト実行 |
+| `npm test` | `remix test` によるテスト実行 |
 | `npm run typecheck` | `tsc -b`（インクリメンタル） |
 | `npm run routes` | ルート契約を表形式で確認 |
 | `npm run doctor` | プロジェクトのヘルスチェック |
@@ -39,8 +39,8 @@ http://localhost:44100 が開発サーバー、http://localhost:44100/dev/ui が
 単一ファイル・単一テストの実行:
 
 ```sh
-NODE_ENV=test node --import remix/node-tsx --test app/actions/controller.test.tsx
-NODE_ENV=test node --import remix/node-tsx --test --test-name-pattern 'renders home'
+npm test -- app/actions/controller.test.tsx
+npm test -- --only 'renders the home page'
 ```
 
 ## ディレクトリ構成
@@ -226,7 +226,7 @@ export const ExampleCopyButton = clientEntry(
 
 テストは対象の隣に置きます（`app/actions/controller.test.tsx`、`app/ui/**/<name>.test.tsx`）。`app/assets.ts` の `denyFiles: ['app/**/*.test.*']` があるため、隣接していてもブラウザから到達することはありません。
 
-**`remix/test` ではなく `node:test` で書いてください。** `test` スクリプトは素の `node --test` で、`remix/test` で登録したスイートは読み込まれるだけでアサーションが実行されず、それでも成功として報告されます。3.0.0 の `remix test` ランナーはサーバー・コンポーネントのテストなら Playwright なしで動くので移行は可能になりましたが、`test` スクリプトを切り替えるまでは `node:test` を使ってください。`describe` / `it` は `node:test` から、アサーションは `import * as assert from 'remix/assert'` の名前空間インポートで取り込みます。
+**`node:test` ではなく `remix/test` で書いてください。** `test` スクリプトは `remix test` で、サーバーランナーが `**/*.test.{ts,tsx}` を検出します。`describe` / `it` は `remix/test` から、アサーションは `import * as assert from 'remix/assert'` の名前空間インポートで取り込みます。`node:test` で書いたテストは失敗しても `remix test` が集計せず終了コード 0 になるため、`.oxlintrc.json` の `no-restricted-imports` で禁止しています。条件付きのスキップは `t.skip()` ではなく `{ skip: '<理由>' }` オプションで書きます（`app/env.test.ts` を参照）。
 
 ルートの挙動は `router.fetch(new Request(...))` の `Response` に対して、コンポーネントは `renderToString` で検証します。
 
