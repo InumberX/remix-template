@@ -270,7 +270,7 @@ Remix 3 has no build step, so where the other repos run a `build` job this one r
 
 Node comes from `.node-version` via `actions/setup-node`'s `node-version-file`, so CI cannot drift from the pin the repo already carries.
 
-There is no `deploy.yml` — no deploy target is configured yet. The labelling workflow needs `enhancement` and `bug` to exist as repository labels. The release PR is opened with a GitHub App token (a PR opened with `GITHUB_TOKEN` triggers no CI), so the repository needs the App's id in the `GHA_APP_ID` variable and its private key in the `GHA_PRIVATE_PEM` secret.
+There is no `deploy.yml` — no deploy target is configured yet. The labelling workflow needs `enhancement` and `bug` to exist as repository labels. The release PR is opened with `GITHUB_TOKEN`, so it triggers no `pull_request` workflow; that is fine while CI runs on `push` (the release PR's head is `develop`, whose push already ran it). Switch to a GitHub App token before adding a `pull_request` workflow.
 
 ## Architecture
 
