@@ -261,8 +261,8 @@ Workflows live in `.github/workflows/` and mirror the `after_works` / `sugidama`
 | --- | --- | --- |
 | `push.yml` | push to any branch | `setup` -> (`lint` / `test`) -> `routes` |
 | `automation-pr-label.yml` | PR opened | labels `enhancement` / `bug` from the branch prefix |
-| `automation-release-pr.yml` | push to `develop` | opens the `develop` -> `main` release PR |
-| `automation-release-note.yml` | push to `main` | cuts a `v{YYYY.MM.DD}-{n}` tag and generates the release note |
+| `automation-release-pr.yml` | push to `develop` | opens the `develop` -> `main` release PR and keeps its body listing the unreleased PRs and their authors |
+| `automation-release-note.yml` | push to `main` | cuts a `v{YYYY.MM.DD}-{n}` tag and uses the release PR's body as the release note |
 
 The `lint` job runs `format`, `stylelint`, `lint`, `typecheck` in that order.
 
@@ -270,7 +270,7 @@ Remix 3 has no build step, so where the other repos run a `build` job this one r
 
 Node comes from `.node-version` via `actions/setup-node`'s `node-version-file`, so CI cannot drift from the pin the repo already carries.
 
-There is no `deploy.yml` — no deploy target is configured yet. The labelling workflows need `enhancement`, `bug` and `release` to exist as repository labels.
+There is no `deploy.yml` — no deploy target is configured yet. The labelling workflow needs `enhancement` and `bug` to exist as repository labels. The release PR is opened with a GitHub App token (a PR opened with `GITHUB_TOKEN` triggers no CI), so the repository needs the App's id in the `GHA_APP_ID` variable and its private key in the `GHA_PRIVATE_PEM` secret.
 
 ## Architecture
 

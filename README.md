@@ -259,8 +259,8 @@ GitHub Actions は `.github/workflows/` にあります。after_works / sugidama
 | --- | --- | --- |
 | `push.yml` | 全ブランチへの push | `setup` →（`lint` / `test`）→ `routes` |
 | `automation-pr-label.yml` | PR 作成時 | ブランチの prefix から `enhancement` / `bug` を付与 |
-| `automation-release-pr.yml` | `develop` への push | `develop` → `main` のリリース PR を作成 |
-| `automation-release-note.yml` | `main` への push | `v{YYYY.MM.DD}-{連番}` のタグとリリースノートを生成 |
+| `automation-release-pr.yml` | `develop` への push | `develop` → `main` のリリース PR を作成し、未リリースの PR と関係者の一覧で本文を更新 |
+| `automation-release-note.yml` | `main` への push | `v{YYYY.MM.DD}-{連番}` のタグを切り、リリース PR の本文をリリースノートにする |
 
 `lint` ジョブは `format` → `stylelint` → `lint` → `typecheck` の順に走ります。
 
@@ -268,7 +268,7 @@ Remix 3 にビルドステップは無いため、他リポジトリの `build` 
 
 Node のバージョンは `actions/setup-node` の `node-version-file` で `.node-version` から読みます。
 
-デプロイ先が未定のため `deploy.yml` は入れていません。自動ラベル付与には `enhancement` / `bug` / `release` の各ラベルがリポジトリ側に必要です。
+デプロイ先が未定のため `deploy.yml` は入れていません。自動ラベル付与には `enhancement` / `bug` の各ラベルがリポジトリ側に必要です。リリース PR は GitHub App のトークンで作るため（`GITHUB_TOKEN` で作った PR では CI が走らない）、App ID を Variables の `GHA_APP_ID` に、秘密鍵を Secrets の `GHA_PRIVATE_PEM` に設定してください。
 
 ## コーディング規約
 
