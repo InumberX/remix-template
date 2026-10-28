@@ -2,7 +2,7 @@
 //
 // The `isSignIn` variant is dropped — it offsets a taller signed-in header that
 // this project has no equivalent for.
-import { css, type Handle, type MixInput } from 'remix/ui'
+import { css, type Handle, type MixInput } from 'remix/component'
 
 import * as styles from './layout-page-wrapper.styles.ts'
 import type { LayoutPageWrapperProps } from './layout-page-wrapper.types.ts'

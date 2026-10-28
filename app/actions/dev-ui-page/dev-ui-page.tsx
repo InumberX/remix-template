@@ -1,7 +1,7 @@
 // Development-only gallery. It renders every component in app/ui/ through the
 // same server render pipeline the real pages use, so a specimen here cannot
 // diverge from what ships. `npm run hmr` reloads it on edit.
-import { css, type Handle } from 'remix/ui'
+import { css, type Handle } from 'remix/component'
 
 import { routes } from '../../routes.ts'
 import { BaseButton } from '../../ui/buttons/base-button/base-button.tsx'

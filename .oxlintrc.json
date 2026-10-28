@@ -15,6 +15,17 @@
     "import/first": "error",
     "import/namespace": "allow",
     "no-array-constructor": "error",
+    "no-restricted-imports": [
+      "error",
+      {
+        "paths": [
+          {
+            "name": "node:test",
+            "message": "Use `remix/test`. `remix test` does not count node:test results, so a failing node:test test still exits 0."
+          }
+        ]
+      }
+    ],
     "no-shadow": "allow",
     "no-unused-vars": "error",
     "react/jsx-no-target-blank": "allow",

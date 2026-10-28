@@ -2,7 +2,7 @@
 //
 // vanilla-extract's `createContainer()` generated a unique container name; here
 // the name is a plain constant, since there is no build step to scope it.
-import { css, type Handle, type MixInput } from 'remix/ui'
+import { css, type Handle, type MixInput } from 'remix/component'
 
 import * as styles from './layout-main.styles.ts'
 import type { LayoutMainProps } from './layout-main.types.ts'

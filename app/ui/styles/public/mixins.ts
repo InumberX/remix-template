@@ -1,5 +1,5 @@
 // Ported from auba-general-view: app/styles/mixins/{transition,size}.css.ts
-import type { css } from 'remix/ui'
+import type { css } from 'remix/component'
 
 import { BREAKPOINTS } from './breakpoints.ts'
 

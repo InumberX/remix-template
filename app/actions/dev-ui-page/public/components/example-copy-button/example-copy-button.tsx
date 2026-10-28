@@ -1,4 +1,4 @@
-import { clientEntry, css, on, type Handle } from 'remix/ui'
+import { clientEntry, css, on, type Handle } from 'remix/component'
 
 import * as styles from './example-copy-button.styles.ts'
 import type { ExampleCopyButtonProps } from './example-copy-button.types.ts'

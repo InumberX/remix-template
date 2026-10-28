@@ -4,7 +4,7 @@
 // has no meta API — `Document` owns `<head>` — so this returns the tags
 // themselves, and `Document` places them. The site-wide defaults live here; a
 // page overrides only what differs.
-import type { RemixNode } from 'remix/ui'
+import type { RemixNode } from 'remix/component'
 
 import { IS_PRODUCTION, NO_INDEX, SITE_URL } from '../env.ts'
 
