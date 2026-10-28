@@ -258,7 +258,6 @@ GitHub Actions は `.github/workflows/` にあります。after_works / sugidama
 | ワークフロー | トリガー | 内容 |
 | --- | --- | --- |
 | `push.yml` | 全ブランチへの push | `setup` →（`lint` / `test`）→ `routes` |
-| `automation-pr-label.yml` | PR 作成時 | ブランチの prefix から `enhancement` / `bug` を付与 |
 | `automation-release-pr.yml` | `develop` への push | `develop` → `main` のリリース PR を作成し、未リリースの PR と関係者の一覧で本文を更新 |
 | `automation-release-note.yml` | `main` への push | `v{YYYY.MM.DD}-{連番}` のタグを切り、リリース PR の本文をリリースノートにする |
 
@@ -268,7 +267,7 @@ Remix 3 にビルドステップは無いため、他リポジトリの `build` 
 
 Node のバージョンは `actions/setup-node` の `node-version-file` で `.node-version` から読みます。
 
-デプロイ先が未定のため `deploy.yml` は入れていません。自動ラベル付与には `enhancement` / `bug` の各ラベルがリポジトリ側に必要です。リリース PR は `GITHUB_TOKEN` で作るため、`pull_request` で動くワークフローは走りません。CI は `push` で動き、リリース PR の中身である `develop` への push で走り済みなので問題ありませんが、`pull_request` で動くワークフローを足すときは GitHub App のトークンに切り替えてください。
+デプロイ先が未定のため `deploy.yml` は入れていません。リリース PR は `GITHUB_TOKEN` で作るため、それが起動する `pull_request` のワークフローは手動の承認待ちで止まります。CI は `push` で動き、リリース PR の中身である `develop` への push で走り済みなので問題ありませんが、`pull_request` で動くワークフローを足すときは GitHub App のトークンに切り替えてください。
 
 ## コーディング規約
 

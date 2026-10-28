@@ -260,7 +260,6 @@ Workflows live in `.github/workflows/` and mirror the `after_works` / `sugidama`
 | Workflow | Trigger | What it does |
 | --- | --- | --- |
 | `push.yml` | push to any branch | `setup` -> (`lint` / `test`) -> `routes` |
-| `automation-pr-label.yml` | PR opened | labels `enhancement` / `bug` from the branch prefix |
 | `automation-release-pr.yml` | push to `develop` | opens the `develop` -> `main` release PR and keeps its body listing the unreleased PRs and their authors |
 | `automation-release-note.yml` | push to `main` | cuts a `v{YYYY.MM.DD}-{n}` tag and uses the release PR's body as the release note |
 
@@ -270,7 +269,7 @@ Remix 3 has no build step, so where the other repos run a `build` job this one r
 
 Node comes from `.node-version` via `actions/setup-node`'s `node-version-file`, so CI cannot drift from the pin the repo already carries.
 
-There is no `deploy.yml` — no deploy target is configured yet. The labelling workflow needs `enhancement` and `bug` to exist as repository labels. The release PR is opened with `GITHUB_TOKEN`, so it triggers no `pull_request` workflow; that is fine while CI runs on `push` (the release PR's head is `develop`, whose push already ran it). Switch to a GitHub App token before adding a `pull_request` workflow.
+There is no `deploy.yml` — no deploy target is configured yet. The release PR is opened with `GITHUB_TOKEN`, so any `pull_request` workflow it starts waits for a manual approval; that is fine while CI runs on `push` (the release PR's head is `develop`, whose push already ran it). Switch to a GitHub App token before adding a `pull_request` workflow.
 
 ## Architecture
 
