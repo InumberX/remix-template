@@ -265,6 +265,8 @@ Workflows live in `.github/workflows/` and mirror the `after_works` / `sugidama`
 
 The `lint` job runs `format`, `stylelint`, `lint`, `typecheck` in that order.
 
+`.github/dependabot.yml` opens one weekly pull request (Mondays, 06:00 JST) that raises every GitHub Action to its newest major. npm dependencies are not covered.
+
 Remix 3 has no build step, so where the other repos run a `build` job this one runs `routes`. `remix routes --table` loads `app/routes.ts` and every controller it names, which is the closest thing to a build-time check that the route contract still resolves.
 
 Node comes from `.node-version` via `actions/setup-node`'s `node-version-file`, so CI cannot drift from the pin the repo already carries.

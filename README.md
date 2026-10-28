@@ -263,6 +263,8 @@ GitHub Actions は `.github/workflows/` にあります。after_works / sugidama
 
 `lint` ジョブは `format` → `stylelint` → `lint` → `typecheck` の順に走ります。
 
+`.github/dependabot.yml` が毎週月曜 6:00（日本時間）に、GitHub Actions のアクションを最新のメジャーバージョンに上げる PR を 1 本作ります。npm の依存は対象外です。
+
 Remix 3 にビルドステップは無いため、他リポジトリの `build` ジョブの位置には `routes` を置いています。`app/routes.ts` と各コントローラーの対応が壊れていればここで落ちます。
 
 Node のバージョンは `actions/setup-node` の `node-version-file` で `.node-version` から読みます。
