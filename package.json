@@ -20,22 +20,22 @@
     "stylelint-fix": "stylelint --fix \"./public/**/*.css\"",
     "pre-commit": "npm run typecheck && npm run format-fix && npm run lint-fix && npm run stylelint-fix"
   },
-  "engines": {
-    "node": ">=24.3.0"
-  },
-  "volta": {
-    "node": "24.16.0"
-  },
   "dependencies": {
-    "remix": "^3.0.0"
+    "remix": "^3.1.0"
   },
   "devDependencies": {
-    "@types/node": "^24.13.3",
-    "oxfmt": "^0.66.0",
-    "oxlint": "^1.81.0",
-    "stylelint": "^17.14.1",
+    "@types/node": "^26.6.6",
+    "oxfmt": "^0.75.0",
+    "oxlint": "^1.90.0",
+    "stylelint": "^17.16.0",
     "stylelint-config-standard": "^40.0.0",
-    "stylelint-order": "^8.1.1",
+    "stylelint-order": "^8.1.2",
     "typescript": "7.0.2"
+  },
+  "engines": {
+    "node": ">=26.0.0"
+  },
+  "volta": {
+    "node": "26.13.0"
   }
 }
