@@ -24,7 +24,7 @@
     "remix": "^3.0.0"
   },
   "devDependencies": {
-    "@types/node": "^24.13.3",
+    "@types/node": "^26.6.6",
     "oxfmt": "^0.75.0",
     "oxlint": "^1.90.0",
     "stylelint": "^17.16.0",
