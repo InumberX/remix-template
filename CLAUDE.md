@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Read First
 
 - `AGENTS.md` — starter layout and route-ownership conventions.
-- `.agents/skills/remix/SKILL.md` — the Remix 3 mental model and how to find documentation. It is the file `remix new` generates for 3.0.0, kept verbatim so a later version can be diffed in; this project's own layout rules live in `AGENTS.md` and here, not in the skill.
+- `.agents/skills/remix/SKILL.md` — the Remix 3 mental model and how to find documentation. It is the file `remix new` generates for 3.2.0, kept verbatim so a later version can be diffed in; this project's own layout rules live in `AGENTS.md` and here, not in the skill.
 - `node_modules/remix/INDEX.md` — the installed documentation index. Search it by task or export (`grep -i session node_modules/remix/INDEX.md`), read the matching guide under `node_modules/remix/guides/`, then the package README for exact APIs. The README directory is not always the subpath name (`remix/router` → `src/fetch-router/README.md`); the index maps them.
 
 ## Commands
@@ -275,7 +275,7 @@ There is no `deploy.yml` — no deploy target is configured yet. The release PR 
 
 ## Architecture
 
-Remix 3 (`remix@3.0.0`), server-first, built on Web `Request`/`Response`. Everything runtime imports from a `remix/<subpath>`. The top-level `remix` module exists only as the augmentation target for `RouterTypes`.
+Remix 3 (`remix@3.2.0`), server-first, built on Web `Request`/`Response`. Everything runtime imports from a `remix/<subpath>`. The top-level `remix` module exists only as the augmentation target for `RouterTypes`.
 
 Request flow: `server.ts` (`node:http` + `createRequestListener(router.fetch)`, whose default `onError` logs and answers 500) → `router.fetch(request)` → middleware stack in `app/router.ts` (`staticFiles('./public')` then `render({ assets })`) → the controller mapped for the matched route → a `Response`.
 
