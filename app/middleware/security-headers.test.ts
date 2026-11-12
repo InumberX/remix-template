@@ -58,13 +58,13 @@ describe('securityHeaders()', () => {
     assert.equal(response.headers.get('X-Content-Type-Options'), 'nosniff')
   })
 
-  it('sends a two-year, preload-ready HSTS policy in production', async () => {
+  it('sends a two-year HSTS policy for this host only in production', async () => {
     const response = await createTestRouter({ production: true }).fetch(
       new Request('http://localhost/')
     )
     assert.equal(
       response.headers.get('Strict-Transport-Security'),
-      'max-age=63072000; includeSubDomains; preload'
+      'max-age=63072000'
     )
   })
 
