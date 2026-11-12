@@ -7,7 +7,9 @@ import controller from './actions/controller.tsx'
 import { assets } from './assets.ts'
 import { IS_PRODUCTION } from './env.ts'
 import { renderWithCsp } from './middleware/csp.tsx'
+import { errorPage } from './middleware/error-page.tsx'
 import { securityHeaders } from './middleware/security-headers.ts'
+import { trailingSlash } from './middleware/trailing-slash.ts'
 import { routes } from './routes.ts'
 
 // - securityHeaders() first, so its headers land on everything below it: static
@@ -15,10 +17,16 @@ import { routes } from './routes.ts'
 // - cop() rejects unsafe cross-origin requests (POST/PUT/PATCH/DELETE) from
 //   `Sec-Fetch-Site` / `Origin`, without tokens or sessions. When sessions
 //   arrive, add session() and then csrf() after it (see CLAUDE.md).
+// - trailingSlash() redirects `/articles/` to `/articles` before matching:
+//   route patterns are exact.
 // - renderWithCsp() is csp() with render() inside it, so the renderer stamps
 //   the request's nonce on everything it writes.
+// - errorPage() last, inside the renderer: it turns every plain-text error
+//   below it into the site's error page, which then gets its CSP on the way
+//   out through renderWithCsp().
 const securityHeadersMiddleware = securityHeaders()
 const copMiddleware = cop()
+const trailingSlashMiddleware = trailingSlash()
 const staticFilesMiddleware = staticFiles('./public', {
   index: false,
   // Root `public/` is served verbatim, so URLs never change on their own.
@@ -28,13 +36,16 @@ const staticFilesMiddleware = staticFiles('./public', {
   cacheControl: IS_PRODUCTION ? 'public, max-age=86400' : 'no-cache',
 })
 const renderMiddleware = renderWithCsp({ assets })
+const errorPageMiddleware = errorPage()
 
 type AppContext = MiddlewareContext<
   [
     typeof securityHeadersMiddleware,
     typeof copMiddleware,
+    typeof trailingSlashMiddleware,
     typeof staticFilesMiddleware,
     typeof renderMiddleware,
+    typeof errorPageMiddleware,
   ]
 >
 
@@ -45,7 +56,14 @@ declare module 'remix' {
 }
 
 export const router = createRouter<AppContext>({
-  middleware: [securityHeadersMiddleware, copMiddleware, staticFilesMiddleware, renderMiddleware],
+  middleware: [
+    securityHeadersMiddleware,
+    copMiddleware,
+    trailingSlashMiddleware,
+    staticFilesMiddleware,
+    renderMiddleware,
+    errorPageMiddleware,
+  ],
 })
 
 router.map(routes, controller)
