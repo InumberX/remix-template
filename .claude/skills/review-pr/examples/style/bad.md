@@ -110,6 +110,7 @@ return new Response(null, { status: HTTP_STATUS.NOT_FOUND })
 import { BaseButton } from '../../../../../ui/buttons/base-button/base-button.tsx'  // public/ の外
 
 // Good — 使う部品を public/ に移してから import する（初めて必要になったときに移す）
+// （仮の例。テンプレートの BaseButton は今は ui/buttons/base-button/ にあり、public/ にはない）
 import { BaseButton } from '../../../../../ui/buttons/public/base-button/base-button.tsx'
 ```
 
