@@ -71,8 +71,11 @@ export const NO_INDEX = process.env.NO_INDEX === 'true'
  *
  *   `/static/img/img.jpg?${CACHE_BUSTER}`  ->  `/static/img/img.jpg?${string}`
  *
+ * `BUILD_ID` is URL-encoded, so an id with a space, `&` or `#` stays one
+ * query value instead of breaking the URL.
+ *
  * Assets served by the asset server (anything under a `public/` directory) do
  * NOT need this: they carry content-based ETags, and in production
  * `fingerprint` in app/assets.ts gives them immutable URLs.
  */
-export const CACHE_BUSTER = `ver=${BUILD_ID}`
+export const CACHE_BUSTER = `ver=${encodeURIComponent(BUILD_ID)}`

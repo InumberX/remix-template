@@ -33,12 +33,6 @@ export function PrimitiveButton(handle: Handle<PrimitiveButtonProps>) {
       nonClickableTag = 'span',
     } = handle.props
 
-    // Cross-origin links are never enhanced by the client runtime, and in-page
-    // hash links should stay a plain browser jump, so both opt out explicitly.
-    const isDocumentNavigation = url
-      ? url.startsWith('http://') || url.startsWith('https://') || url.startsWith('#')
-      : false
-
     // One css(...) call: the reset, the disabled treatment and the caller's
     // recipe are merged as plain objects, so JS spread order decides which
     // declaration wins. Output is content-hashed and deduplicated.
@@ -63,7 +57,7 @@ export function PrimitiveButton(handle: Handle<PrimitiveButtonProps>) {
           aria-label={ariaLabel}
           aria-controls={ariaControls}
           aria-selected={ariaSelected}
-          data-rmx-document={isDocumentNavigation ? '' : undefined}
+          data-rmx-document={isDocumentNavigation(url) ? '' : undefined}
           mix={hostStyle}
         >
           {children}
@@ -109,5 +103,30 @@ export function PrimitiveButton(handle: Handle<PrimitiveButtonProps>) {
         {children}
       </Tag>
     )
+  }
+}
+
+/** A stand-in origin to resolve relative URLs against; it never leaves this module. */
+const APP_ORIGIN = 'https://app.invalid'
+
+/**
+ * Whether a link should bypass the client runtime's navigation and load as a
+ * plain document: anything that does not resolve to this origin (another
+ * site, `mailto:`, `tel:`, a protocol-relative `//host`), and an in-page
+ * `#hash`, which should stay a plain browser jump. The URL is resolved the way
+ * the browser resolves an href rather than matched as a string, so `/\host`
+ * and a tab or newline smuggled into `/\t/host` — both of which a browser
+ * reads as `//host` — count as another origin too.
+ *
+ * There is no request here to read the real origin from, so an absolute URL to
+ * this site counts as another site and loads as a full document: still
+ * correct, only slower. Pass internal links as `routes.<name>.href()` paths.
+ */
+const isDocumentNavigation = (url: string): boolean => {
+  if (url.startsWith('#')) return true
+  try {
+    return new URL(url, APP_ORIGIN).origin !== APP_ORIGIN
+  } catch {
+    return true
   }
 }
