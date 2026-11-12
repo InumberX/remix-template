@@ -16,9 +16,14 @@ const ALWAYS = {
 /**
  * Production only: HSTS on `localhost` would pin the browser to HTTPS for every
  * local port for two years.
+ *
+ * This host only. `includeSubDomains` would pin every subdomain of the domain
+ * the app is served from to HTTPS as well, and `preload` asks to be put on the
+ * browsers' built-in list, which takes months to leave. Both are a decision
+ * about the whole domain, so a project adds them once it has made it.
  */
 const PRODUCTION_ONLY = {
-  'Strict-Transport-Security': 'max-age=63072000; includeSubDomains; preload',
+  'Strict-Transport-Security': 'max-age=63072000',
 } as const
 
 /**

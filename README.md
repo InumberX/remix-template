@@ -206,7 +206,7 @@ export const ExampleCopyButton = clientEntry(
 
 `app/router.ts` で `securityHeaders()`、`cop()`、`staticFiles()`、`renderWithCsp()` の順に通します。
 
-- **`securityHeaders()`** — すべての応答（静的ファイルを含む）に `X-Content-Type-Options: nosniff` と `X-Frame-Options: DENY` を付け、本番だけ `Strict-Transport-Security` を付けます。CSP を持たない応答には `default-src 'none'; frame-ancestors 'none'` を付けます。投げられた例外は、これらのヘッダー付きの 500 にします。
+- **`securityHeaders()`** — すべての応答（静的ファイルを含む）に `X-Content-Type-Options: nosniff` と `X-Frame-Options: DENY` を付け、本番だけ `Strict-Transport-Security: max-age=63072000` を付けます。このホストだけが対象です。`includeSubDomains`（サブドメインもすべて HTTPS に固定）と `preload`（ブラウザに組み込まれた一覧への登録。外すのに数か月かかる）はドメイン全体の判断なので、決めたプロジェクトが `security-headers.ts` の `PRODUCTION_ONLY` に足してください。CSP を持たない応答には `default-src 'none'; frame-ancestors 'none'` を付けます。投げられた例外は、これらのヘッダー付きの 500 にします。
 - **`renderWithCsp()`** — Remix の `csp()` の中で `render()` を動かし、リクエストごとの nonce で CSP を送ります。`css(...)` の `<style>` には `render()` が nonce を付けるので、`style-src` に `'unsafe-inline'` は要りません。自分で書く `<script>`・`<link rel="modulepreload">`・`<ImportMap>` には `nonce={useCspNonce(handle)}` を渡してください（`document.tsx` が例）。外部のオリジン（フォント、解析タグなど）を使い始めたら `app/middleware/csp.tsx` の `DIRECTIVES` に足します。`npm run hmr` のときは HMR の通信先（`http://127.0.0.1:${HMR_PORT}`）を `connect-src` に足します。
 - **`cop()`** — 外部オリジンからの POST などを拒否します。セッションを導入したら、`session()` と `csrf()` を `cop()` の後に足します。
 
