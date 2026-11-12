@@ -307,5 +307,6 @@ Node のバージョンは `actions/setup-node` の `node-version-file` で `.no
 
 - `AGENTS.md` — スターター構成とルート所有権の規約。
 - `CLAUDE.md` — 実測から得た規約と落とし穴の記録。
+- `.claude/skills/review-pr/` — PR レビューで確かめる規約（命名・CSS・構造）。`CLAUDE.md` から抜き出したもので、食い違ったら `CLAUDE.md` が正しい。
 - `.agents/skills/remix/SKILL.md` — Remix 3 のメンタルモデルとドキュメントの探し方。3.2.0 の `remix new` が生成するものをそのまま置いています（次のバージョンで差分を取り込みやすくするため）。
 - `node_modules/remix/INDEX.md` — インストール済みドキュメントの索引。タスクやエクスポート名で検索し、`node_modules/remix/guides/` のガイド、次にパッケージの README を読みます（README のディレクトリ名は必ずしもサブパス名と一致しません。例: `remix/router` → `src/fetch-router/README.md`）。
