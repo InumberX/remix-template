@@ -57,6 +57,7 @@ app/
     controller.tsx              ルートマップ直下のリーフ（assets / home / devUi）
     document.tsx                共通のドキュメントシェル
     meta.tsx                    サイト全体のメタデータ既定値
+    error-page.tsx              エラー応答を置き換えるページ（ルートではない）
     home-page/                  ページ（ルートキー + `-page`）
       home-page.tsx
       components/<name>/        そのページ専用のコンポーネント
@@ -201,6 +202,11 @@ export const ExampleCopyButton = clientEntry(
 - props はシリアライズ可能である必要があります。`clientEntry` のシグネチャ自体がこれを検査するので、関数などを渡すと型エラーになります。
 
 実例は `app/actions/dev-ui-page/public/components/example-copy-button/` です。`Example` 接頭辞は「テンプレートの参考資料であり、そのまま使うものではない」ことを示します。
+
+## エラーページと末尾スラッシュ
+
+- **`errorPage()`** — ルートやルーターが返したプレーンテキストのエラー（404、405 など）を、同じステータスとヘッダーのまま `app/actions/error-page.tsx` のページに置き換えます。ルートはエラーを `new Response(null, { status })` で返すだけで済みます。エラーページには canonical と `og:url` を付けません。`/assets/` のモジュールや画像など、ファイルへのリクエストで `Accept` に `text/html` がないものは、プレーンな 404 のままにします。
+- **`trailingSlash()`** — `/path/` を `/path` へ 308 でリダイレクトします（クエリはそのまま、メソッドも保持）。リンクに末尾スラッシュを付けないでください。
 
 ## セキュリティ
 

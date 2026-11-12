@@ -22,7 +22,8 @@ export type PageMeta = {
   title?: string
   description?: string
   /** Absolute URL, or a path resolved against `SITE_URL`. Defaults to the current URL. */
-  canonical?: string
+  /** `null` for a page that has no canonical of its own (an error page): no canonical, no og:url. */
+  canonical?: string | null
   ogImage?: string
   ogType?: OgType
   twitterCard?: TwitterCard
@@ -75,7 +76,9 @@ export const renderMeta = (meta: PageMeta, url: URL): RemixNode => {
   const siteName = meta.siteName ?? SITE_NAME
   const title = resolveTitle(meta)
   const currentUrl = `${SITE_URL}${url.pathname}`
-  const canonicalUrl = meta.canonical ? absoluteUrl(meta.canonical) : currentUrl
+  const canonicalUrl =
+    meta.canonical === null ? undefined : meta.canonical ? absoluteUrl(meta.canonical) : currentUrl
+  const ogUrl = meta.canonical === null ? undefined : currentUrl
   const ogImageUrl = absoluteUrl(meta.ogImage ?? DEFAULT_OG_IMAGE)
 
   // Anything but production is kept out of the index, matching generalview.
@@ -84,11 +87,11 @@ export const renderMeta = (meta: PageMeta, url: URL): RemixNode => {
   return (
     <>
       <meta name="description" content={description} />
-      <link rel="canonical" href={canonicalUrl} />
+      {canonicalUrl ? <link rel="canonical" href={canonicalUrl} /> : null}
 
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />
-      <meta property="og:url" content={currentUrl} />
+      {ogUrl ? <meta property="og:url" content={ogUrl} /> : null}
       <meta property="og:site_name" content={siteName} />
       <meta property="og:image" content={ogImageUrl} />
       <meta property="og:type" content={ogType} />

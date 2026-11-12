@@ -18,6 +18,10 @@ export const withHeaders = (response: Response, headers: Record<string, string>)
     for (const [name, value] of Object.entries(headers)) target.set(name, value)
   })
 
+/** Appends a header value, keeping any the response already has (`Vary`). */
+export const appendHeader = (response: Response, name: string, value: string): Response =>
+  editHeaders(response, (target) => target.append(name, value))
+
 const editHeaders = (response: Response, edit: (headers: Headers) => void): Response => {
   try {
     edit(response.headers)
