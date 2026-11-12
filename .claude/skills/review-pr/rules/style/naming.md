@@ -32,7 +32,7 @@
 - **ARIA 属性をそのまま渡す props は `aria*`**（`ariaLabel`、`ariaControls`、`ariaSelected`）。属性との対応が名前でわかるようにする
 - **呼び出し側からのスタイルの上書きは `styleOverrides`**。`styles` は各ファイルの名前空間 import が使っているので、props に同じ名前を付けない
 - **要素のタグ名を受け取る props は `*Tag`**（`nonClickableTag`）
-- **DOM のイベントは `mix` で付ける**。ボタンのクリックなどは呼び出し側が `mix={on('click', …)}` を渡し、`onClick` のような props を足さない。コンポーネントは `mix` の中身を見られないので、要素の種類（`<a>`・`<button>`）は `url`・`buttonType`・`nonClickableTag` のどれを渡すかで決める（`CLAUDE.md`「What separates the two tiers」）
+- **DOM のイベントは `mix` で付ける**。ボタンのクリックなどは呼び出し側が `mix={on('click', …)}` を渡し、`onClick` のような props を足さない。コンポーネントは `mix` の中身を見られないので、要素の種類（`<a>`・`<button>`）は `url`・`buttonType`・`nonClickableTag` のどれを渡すかで決める。どれか 1 つだけを渡し、型がそれを強制する（`CLAUDE.md`「What separates the two tiers」）
 - **`clientEntry` の props は直列化できる値に限る**。関数を渡すと `clientEntry(...)` の呼び出しが型エラーになる
 
 ## スタイルのレシピ

@@ -1,8 +1,9 @@
 // Ported from auba-general-view: app/components/primitives/buttons/PrimitiveButton
 //
-// Unstyled skeleton. It owns element selection (anchor with a `url` — an empty
-// one included, and without `href` when disabled — button with a `buttonType`,
-// otherwise an inert tag), the accessibility attributes and the
+// Unstyled skeleton. It owns element selection (an anchor for `url` — an empty
+// one included, and without `href` when disabled — a button for `buttonType`,
+// the inert tag named by `nonClickableTag`; the props type requires exactly
+// one), the accessibility attributes and the
 // user-agent reset — nothing else. Design decisions belong to the styled tier in
 // `app/ui/<category>/`, which passes them down through `styleOverrides`.
 import { css, type Handle, type MixInput } from 'remix/component'
@@ -18,7 +19,7 @@ export function PrimitiveButton(handle: Handle<PrimitiveButtonProps>) {
       url,
       target,
       rel,
-      buttonType = 'button',
+      buttonType,
       isDisabled,
       children,
       styleOverrides,
@@ -31,7 +32,7 @@ export function PrimitiveButton(handle: Handle<PrimitiveButtonProps>) {
       ariaLabel,
       ariaControls,
       ariaSelected,
-      nonClickableTag = 'span',
+      nonClickableTag,
     } = handle.props
 
     // One css(...) call: the reset, the caller's recipe and the disabled
@@ -76,11 +77,7 @@ export function PrimitiveButton(handle: Handle<PrimitiveButtonProps>) {
       )
     }
 
-    // The raw prop, not the destructured `buttonType`: that one carries the
-    // 'button' default above and is therefore always truthy. What decides this
-    // branch is whether the caller asked for a button at all — with neither a
-    // `url` nor a `buttonType`, the component falls through to the inert tag.
-    if (handle.props.buttonType) {
+    if (buttonType) {
       return (
         <button
           type={buttonType}
@@ -100,7 +97,10 @@ export function PrimitiveButton(handle: Handle<PrimitiveButtonProps>) {
       )
     }
 
-    const Tag = nonClickableTag
+    // The props type leaves `nonClickableTag` as the only remaining choice.
+    // `?? 'span'` only keeps an untyped caller that passed none of the three
+    // from rendering nothing; typed code cannot reach it.
+    const Tag = nonClickableTag ?? 'span'
 
     return (
       <Tag

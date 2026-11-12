@@ -3,6 +3,7 @@ import { on } from 'remix/component'
 import { renderToString } from 'remix/component/server'
 import { describe, it } from 'remix/test'
 
+import { BaseButton } from '../../../buttons/base-button/base-button.tsx'
 import { PrimitiveButton } from './primitive-button.tsx'
 
 describe('PrimitiveButton', () => {
@@ -107,12 +108,27 @@ describe('PrimitiveButton', () => {
     assert.match(html, /name="intent"/)
   })
 
-  it('falls back to an inert tag with no url and no buttonType', async () => {
-    const span = await renderToString(<PrimitiveButton>Label</PrimitiveButton>)
+  it('renders the named inert tag', async () => {
+    const span = await renderToString(
+      <PrimitiveButton nonClickableTag="span">Label</PrimitiveButton>
+    )
     const div = await renderToString(<PrimitiveButton nonClickableTag="div">Label</PrimitiveButton>)
 
     assert.match(span, /<span/)
     assert.match(div, /<div/)
+  })
+
+  it('makes the caller choose the element: url, buttonType or nonClickableTag', () => {
+    // Type-level only, checked by `npm run typecheck`: each directive fails the
+    // build if its line ever stops being an error.
+    // @ts-expect-error -- neither a link, a button nor an inert tag
+    void (<PrimitiveButton />)
+    // @ts-expect-error -- a link and a button at once
+    void (<PrimitiveButton url="/x" buttonType="button" />)
+    // @ts-expect-error -- a button and an inert tag at once
+    void (<PrimitiveButton buttonType="button" nonClickableTag="span" />)
+    // @ts-expect-error -- the styled tier keeps the rule
+    void (<BaseButton url="/x" buttonType="button" />)
   })
 
   it('marks a disabled button as disabled', async () => {
