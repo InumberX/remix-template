@@ -23,6 +23,28 @@ describe('PrimitiveButton', () => {
     assert.match(hash, /data-rmx-document/)
   })
 
+  it('opts out for every url that does not resolve to this origin', async () => {
+    for (const url of [
+      '//example.com/x',
+      'mailto:hello@example.com',
+      'tel:0312345678',
+      // A browser reads each of these as `//evil.example`.
+      '/\\evil.example',
+      '/\t/evil.example',
+      '/\n/evil.example',
+    ]) {
+      const html = await renderToString(<PrimitiveButton url={url}>Link</PrimitiveButton>)
+      assert.match(html, /data-rmx-document/, url)
+    }
+  })
+
+  it('keeps client navigation for a path and a query on this origin', async () => {
+    for (const url of ['/books', 'books', '?page=2']) {
+      const html = await renderToString(<PrimitiveButton url={url}>Link</PrimitiveButton>)
+      assert.doesNotMatch(html, /data-rmx-document/, url)
+    }
+  })
+
   it('renders a button when buttonType is given', async () => {
     const html = await renderToString(
       <PrimitiveButton buttonType="submit" name="intent" value="save">

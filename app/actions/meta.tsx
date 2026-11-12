@@ -32,9 +32,24 @@ export type PageMeta = {
   siteName?: string
 }
 
-/** Resolves a path against `SITE_URL`; absolute inputs pass through unchanged. */
+/**
+ * Resolves a URL against `SITE_URL` the way a browser resolves an `href`: an
+ * absolute URL passes through, `//host/x` takes the site's scheme, and a path
+ * with or without its leading slash lands under the site. Prefixing the string
+ * instead made `https://site//host/x` and `https://sitex`.
+ */
 export const absoluteUrl = (pathOrUrl: string): string => {
-  return /^https?:\/\//.test(pathOrUrl) ? pathOrUrl : `${SITE_URL}${pathOrUrl}`
+  try {
+    const url = new URL(pathOrUrl, `${SITE_URL}/`)
+    // Only a web address belongs in a canonical or og:image; a `javascript:`
+    // or `data:` value (from a CMS, say) becomes the site's own root instead.
+    return url.protocol === 'http:' || url.protocol === 'https:' ? url.href : `${SITE_URL}/`
+  } catch {
+    // A value no browser could resolve either. Rendering streams, so a throw
+    // here would cut the page off mid-way rather than become a 500; it becomes
+    // the site's root, like any other non-address.
+    return `${SITE_URL}/`
+  }
 }
 
 export const resolveTitle = (meta: PageMeta): string => {
