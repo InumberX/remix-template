@@ -1,6 +1,7 @@
 import { createController } from 'remix/router'
 
 import { routes } from '../../routes.ts'
+import { HTTP_STATUS } from '../../utils/http-status.ts'
 import { ArticlesIndexPage } from './index-page/index-page.tsx'
 import { ArticleShowPage } from './show-page/show-page.tsx'
 
@@ -21,7 +22,7 @@ export default createController(routes.articles, {
       const { id } = context.params
 
       if (!ARTICLE_IDS.has(id)) {
-        return new Response('Not Found', { status: 404 })
+        return new Response('Not Found', { status: HTTP_STATUS.NOT_FOUND })
       }
 
       return context.render(<ArticleShowPage id={id} url={context.url} />)
