@@ -3,6 +3,7 @@ import { ImportMap } from 'remix/component/server'
 
 import { scriptEntry } from '../assets.ts'
 import { CACHE_BUSTER } from '../env.ts'
+import { useCspNonce } from '../ui/contexts/csp-nonce/csp-nonce.tsx'
 import { LayoutWrapper } from '../ui/layouts/layout-wrapper/layout-wrapper.tsx'
 import { type PageMeta, renderMeta, resolveTitle } from './meta.tsx'
 
@@ -26,6 +27,11 @@ export type DocumentProps = {
 }
 
 export function Document(handle: Handle<DocumentProps>) {
+  // Read in setup, like any context read. The CSP's script-src admits only
+  // nonce'd tags, so the import map, the preloads and the script entry that
+  // Document writes itself all carry it.
+  const nonce = useCspNonce(handle)
+
   return () => {
     const { children, head, meta = {}, url } = handle.props
 
@@ -42,11 +48,11 @@ export function Document(handle: Handle<DocumentProps>) {
           <link rel="stylesheet" href={`/static/css/app.css?${CACHE_BUSTER}`} />
           <title>{resolveTitle(meta)}</title>
           {renderMeta(meta, url)}
-          <ImportMap value={scriptEntry.importMap} />
+          <ImportMap value={scriptEntry.importMap} nonce={nonce} />
           {scriptEntry.preloads.map((href) => (
-            <link key={href} rel="modulepreload" href={href} />
+            <link key={href} rel="modulepreload" href={href} nonce={nonce} />
           ))}
-          <script type="module" src={scriptEntry.href}></script>
+          <script type="module" src={scriptEntry.href} nonce={nonce}></script>
           {/* After the script entry: browsers without multiple-import-map support
               must see the import map before any module a page adds here. */}
           {head}
