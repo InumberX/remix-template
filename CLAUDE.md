@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Read First
 
 - `AGENTS.md` — starter layout and route-ownership conventions.
-- `.agents/skills/remix/SKILL.md` — the Remix 3 mental model and how to find documentation. It is the file `remix new` generates for 3.0.0, kept verbatim so a later version can be diffed in; this project's own layout rules live in `AGENTS.md` and here, not in the skill.
+- `.agents/skills/remix/SKILL.md` — the Remix 3 mental model and how to find documentation. It is the file `remix new` generates for 3.2.0, kept verbatim so a later version can be diffed in; this project's own layout rules live in `AGENTS.md` and here, not in the skill.
 - `node_modules/remix/INDEX.md` — the installed documentation index. Search it by task or export (`grep -i session node_modules/remix/INDEX.md`), read the matching guide under `node_modules/remix/guides/`, then the package README for exact APIs. The README directory is not always the subpath name (`remix/router` → `src/fetch-router/README.md`); the index maps them.
 
 ## Commands
@@ -170,6 +170,8 @@ css({ color: 'red', [MEDIA_QUERY.MD]: { color: 'blue' } })
 
 Most of `media-query.ts` has no caller yet. It is the query vocabulary a project writes against, kept complete so a breakpoint is never spelled out inline — not dead code to prune. Note also that `CONTAINER_QUERY.*` carries no container name and so resolves to the nearest ancestor with `container-type`; targeting `layout-main` specifically needs the named form written out by hand.
 
+**Check the emitted CSS for a unitless property.** Remix appends `px` to a number for every property it does not know to be unitless. Up to 3.1.0 `-webkit-line-clamp` was one of them — `WebkitLineClamp: 3` came out as `3px`, which the browser drops, so `getLineClamp` never clamped. 3.2.0 keeps numbers bare for properties that accept them (measured: `WebkitLineClamp: 3` is `-webkit-line-clamp: 3`, `flex: 2` is a grow factor), so `getLineClamp` passes a number, and `mixins.test.tsx` pins the `;` right after the `3` so a `3px` fails it. A string comes out as written, so passing one stays the safe choice for a property you have not checked; read the emitted CSS rather than the recipe.
+
 Upper bounds are written as exclusive (`width < ${BREAKPOINTS.md}px`), which Media Queries Level 4 range syntax gives directly — the same syntax the lower bounds already use. Two reasons, and the second is why there is no `BREAKPOINTS_MAX` companion object: `<= 767px` next to `>= 768px` leaves a fractional viewport width (browser zoom, some high-DPI devices) matching neither; and expressing it would need the `- 1` values written out by hand, because TypeScript has no type-level arithmetic and `${BREAKPOINTS.md - 1}` degrades the string to a `${number}` pattern, breaking the computed key again.
 
 **Example code is prefixed and lives with whatever shows it.** `app/ui/` is production UI that more than one route needs, so a component named to say "do not use me" does not belong in it. `ExampleCopyButton` sits in `app/actions/dev-ui-page/public/components/` — owned by the gallery that displays it — and the `Example` prefix makes every piece of reference material greppable when a real project starts from this template. It is also the one worked example of `clientEntry` hydration.
@@ -275,7 +277,7 @@ There is no `deploy.yml` — no deploy target is configured yet. The release PR 
 
 ## Architecture
 
-Remix 3 (`remix@3.0.0`), server-first, built on Web `Request`/`Response`. Everything runtime imports from a `remix/<subpath>`. The top-level `remix` module exists only as the augmentation target for `RouterTypes`.
+Remix 3 (`remix@3.2.0`), server-first, built on Web `Request`/`Response`. Everything runtime imports from a `remix/<subpath>`. The top-level `remix` module exists only as the augmentation target for `RouterTypes`.
 
 Request flow: `server.ts` (`node:http` + `createRequestListener(router.fetch)`, whose default `onError` logs and answers 500) → `router.fetch(request)` → middleware stack in `app/router.ts` (`staticFiles('./public')` then `render({ assets })`) → the controller mapped for the matched route → a `Response`.
 

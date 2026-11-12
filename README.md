@@ -1,6 +1,6 @@
 # Remix template
 
-[Remix 3](https://remix.run)（`3.0.0`）のスターターテンプレートです。サーバーファーストで、Web 標準の `Request` / `Response` の上に構築されています。
+[Remix 3](https://remix.run)（`3.2.0`）のスターターテンプレートです。サーバーファーストで、Web 標準の `Request` / `Response` の上に構築されています。
 
 - **ビルドステップがありません。** TypeScript は `remix/node-tsx` の import フックで実行時に読み込まれ、ブラウザ向けモジュールはアセットサーバーがオンデマンドでコンパイルします。
 - **URL の単一の情報源。** `app/routes.ts` がルート契約を持ち、`href()` の引数と `context.params` はパターンのリテラル型から導出されます。
@@ -290,5 +290,5 @@ Node のバージョンは `actions/setup-node` の `node-version-file` で `.no
 
 - `AGENTS.md` — スターター構成とルート所有権の規約。
 - `CLAUDE.md` — 実測から得た規約と落とし穴の記録。
-- `.agents/skills/remix/SKILL.md` — Remix 3 のメンタルモデルとドキュメントの探し方。3.0.0 の `remix new` が生成するものをそのまま置いています（次のバージョンで差分を取り込みやすくするため）。
+- `.agents/skills/remix/SKILL.md` — Remix 3 のメンタルモデルとドキュメントの探し方。3.2.0 の `remix new` が生成するものをそのまま置いています（次のバージョンで差分を取り込みやすくするため）。
 - `node_modules/remix/INDEX.md` — インストール済みドキュメントの索引。タスクやエクスポート名で検索し、`node_modules/remix/guides/` のガイド、次にパッケージの README を読みます（README のディレクトリ名は必ずしもサブパス名と一致しません。例: `remix/router` → `src/fetch-router/README.md`）。
