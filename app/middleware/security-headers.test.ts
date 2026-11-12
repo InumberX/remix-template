@@ -62,10 +62,7 @@ describe('securityHeaders()', () => {
     const response = await createTestRouter({ production: true }).fetch(
       new Request('http://localhost/')
     )
-    assert.equal(
-      response.headers.get('Strict-Transport-Security'),
-      'max-age=63072000'
-    )
+    assert.equal(response.headers.get('Strict-Transport-Security'), 'max-age=63072000')
   })
 
   it('leaves HSTS off outside production, so localhost is never pinned to HTTPS', async () => {
