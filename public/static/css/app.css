@@ -358,9 +358,33 @@
     display: none;
   }
 
-  [hidden]:not([hidden='until-found']),
   template {
     display: none;
+  }
+
+  /*
+   * Two rules, both needed:
+   *
+   * - `[hidden]` hides here again, with `!important`, not only in ress's
+   *   `reset` layer: any later layer that sets `display` — a `base` element
+   *   rule (`video`, …) or a `css(...)` recipe in `rmx` (`inline-flex` on a
+   *   button, `flex` on a layout) — would otherwise outrank ress and show a
+   *   hidden element. An important declaration beats every normal one
+   *   whatever its layer, so this one rule covers them all; ress itself stays
+   *   verbatim.
+   * - `until-found` is excluded, and `revert` rolls it back past the author
+   *   layers to the user agent: ress hides every `[hidden]`, and excluding it
+   *   here alone could not undo that. The user agent keeps it rendered
+   *   (hidden by content-visibility instead) so find-in-page can reveal it.
+   *   The `i` flag matches the browser: an enumerated attribute's value is
+   *   ASCII case-insensitive, so `hidden="Until-Found"` is until-found too.
+   */
+  [hidden]:not([hidden='until-found' i]) {
+    display: none !important;
+  }
+
+  [hidden='until-found' i] {
+    display: revert;
   }
 
   a {
@@ -383,6 +407,19 @@
         color: var(--color-util-black);
       }
     }
+  }
+
+  /*
+   * ress removes the focus outline from links, buttons and form controls
+   * (`:focus { outline-width: 0 }`) without putting anything back, which left
+   * keyboard users with no visible focus. `:focus-visible` brings it back for
+   * keyboard navigation without showing it on every mouse click. A component
+   * may restyle it in `rmx`. Black on the white page is far above the 3:1 a
+   * focus indicator needs (WCAG 1.4.11).
+   */
+  :focus-visible {
+    outline: 2px solid var(--color-util-black);
+    outline-offset: 2px;
   }
 
   i,
