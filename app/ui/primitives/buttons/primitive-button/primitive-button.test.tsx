@@ -6,6 +6,57 @@ import { describe, it } from 'remix/test'
 import { PrimitiveButton } from './primitive-button.tsx'
 
 describe('PrimitiveButton', () => {
+  it('treats an empty url as a link, not as a button or the inert tag', async () => {
+    const html = await renderToString(<PrimitiveButton url="">Here</PrimitiveButton>)
+
+    assert.match(html, /<a[^>]*href=""/)
+  })
+
+  it('keeps the disabled treatment over a caller recipe that sets cursor', async () => {
+    const html = await renderToString(
+      <PrimitiveButton buttonType="button" isDisabled styleOverrides={{ cursor: 'pointer' }}>
+        Nope
+      </PrimitiveButton>
+    )
+
+    assert.match(html, /cursor: not-allowed/)
+    assert.doesNotMatch(html, /cursor: pointer/)
+  })
+
+  it('renders a disabled link without href, so the keyboard cannot follow it', async () => {
+    const html = await renderToString(
+      <PrimitiveButton url="https://remix.run" isDisabled tabIndex={0} target="_blank">
+        Remix
+      </PrimitiveButton>
+    )
+
+    assert.match(html, /<a[^>]*aria-disabled="true"/)
+    assert.match(html, /role="link"/)
+    assert.doesNotMatch(html, /href=/)
+    assert.doesNotMatch(html, /tabindex/i)
+    assert.doesNotMatch(html, /target=/)
+    assert.doesNotMatch(html, /data-rmx-document/)
+  })
+
+  it('keeps the caller role and ARIA state on a disabled link', async () => {
+    const html = await renderToString(
+      <PrimitiveButton
+        url="/tab-2"
+        role="tab"
+        ariaControls="panel-2"
+        ariaSelected={false}
+        isDisabled
+      >
+        Tab 2
+      </PrimitiveButton>
+    )
+
+    assert.match(html, /role="tab"/)
+    assert.match(html, /aria-controls="panel-2"/)
+    assert.match(html, /aria-selected="false"/)
+    assert.match(html, /aria-disabled="true"/)
+  })
+
   it('renders an enhanced anchor for an internal url', async () => {
     const html = await renderToString(<PrimitiveButton url="/books">Books</PrimitiveButton>)
 

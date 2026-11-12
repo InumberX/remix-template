@@ -1,7 +1,8 @@
 // Ported from auba-general-view: app/components/primitives/buttons/PrimitiveButton
 //
-// Unstyled skeleton. It owns element selection (anchor with a `url`, button with
-// a `buttonType`, otherwise an inert tag), the accessibility attributes and the
+// Unstyled skeleton. It owns element selection (anchor with a `url` — an empty
+// one included, and without `href` when disabled — button with a `buttonType`,
+// otherwise an inert tag), the accessibility attributes and the
 // user-agent reset — nothing else. Design decisions belong to the styled tier in
 // `app/ui/<category>/`, which passes them down through `styleOverrides`.
 import { css, type Handle, type MixInput } from 'remix/component'
@@ -33,31 +34,41 @@ export function PrimitiveButton(handle: Handle<PrimitiveButtonProps>) {
       nonClickableTag = 'span',
     } = handle.props
 
-    // One css(...) call: the reset, the disabled treatment and the caller's
-    // recipe are merged as plain objects, so JS spread order decides which
+    // One css(...) call: the reset, the caller's recipe and the disabled
+    // treatment are merged as plain objects, so JS spread order decides which
     // declaration wins. Output is content-hashed and deduplicated.
     const hostStyle: MixInput<HTMLElement> = [
       css({
         ...styles.primitiveButton,
-        ...(isDisabled ? styles.primitiveButton__disabled : null),
         ...styleOverrides,
+        // Last, so no caller recipe (a styled tier's own `cursor` or
+        // `pointer-events`) can switch the disabled treatment back off.
+        ...(isDisabled ? styles.primitiveButton__disabled : null),
       }),
       mix,
     ]
 
-    if (url) {
+    // `!== undefined`, not truthiness: an empty `url` is still a link (to the
+    // current page), not a silent fall-through to a button or the inert tag.
+    if (url !== undefined) {
+      // A disabled link keeps its element but loses `href`: an `<a>` without
+      // one is neither focusable nor followable, so Tab and Enter cannot reach
+      // a destination that `pointer-events: none` only hid from the mouse.
+      // `aria-disabled` keeps it announced as disabled, and the caller's role
+      // (a disabled tab, say) survives; without one it stays a link.
       return (
         <a
-          href={url}
-          target={target}
-          rel={rel}
+          href={isDisabled ? undefined : url}
+          target={isDisabled ? undefined : target}
+          rel={isDisabled ? undefined : rel}
           title={title}
-          role={role}
-          tabIndex={tabIndex}
+          role={isDisabled ? (role ?? 'link') : role}
+          tabIndex={isDisabled ? undefined : tabIndex}
+          aria-disabled={isDisabled ? 'true' : undefined}
           aria-label={ariaLabel}
           aria-controls={ariaControls}
           aria-selected={ariaSelected}
-          data-rmx-document={isDocumentNavigation(url) ? '' : undefined}
+          data-rmx-document={!isDisabled && isDocumentNavigation(url) ? '' : undefined}
           mix={hostStyle}
         >
           {children}
