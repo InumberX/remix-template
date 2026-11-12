@@ -1,6 +1,6 @@
 # Remix template
 
-[Remix 3](https://remix.run)（`3.0.0`）のスターターテンプレートです。サーバーファーストで、Web 標準の `Request` / `Response` の上に構築されています。
+[Remix 3](https://remix.run)（`3.2.0`）のスターターテンプレートです。サーバーファーストで、Web 標準の `Request` / `Response` の上に構築されています。
 
 - **ビルドステップがありません。** TypeScript は `remix/node-tsx` の import フックで実行時に読み込まれ、ブラウザ向けモジュールはアセットサーバーがオンデマンドでコンパイルします。
 - **URL の単一の情報源。** `app/routes.ts` がルート契約を持ち、`href()` の引数と `context.params` はパターンのリテラル型から導出されます。
@@ -51,10 +51,13 @@ app/
   router.ts                     ミドルウェアスタックと router.map
   assets.ts                     ブラウザ向けアセットパイプライン
   env.ts                        process.env を読む唯一のモジュール
+  middleware/                   セキュリティヘッダー・CSP などのミドルウェア
+  utils/http-status.ts          HTTP ステータスの定数（HTTP_STATUS）
   actions/
     controller.tsx              ルートマップ直下のリーフ（assets / home / devUi）
     document.tsx                共通のドキュメントシェル
     meta.tsx                    サイト全体のメタデータ既定値
+    error-page.tsx              エラー応答を置き換えるページ（ルートではない）
     home-page/                  ページ（ルートキー + `-page`）
       home-page.tsx
       components/<name>/        そのページ専用のコンポーネント
@@ -66,6 +69,7 @@ app/
     public/entry.ts             ブラウザランタイムのエントリ
   ui/                           複数ルートで使う共有 UI
     styles/public/              デザイントークン、ブレークポイント、クエリ定数
+    contexts/csp-nonce/         CSP の nonce をコンポーネントへ渡すプロバイダーとフック
     types/                      型のみの DOM 語彙
     primitives/<category>/<component>/
     <category>/<component>/
@@ -199,6 +203,19 @@ export const ExampleCopyButton = clientEntry(
 
 実例は `app/actions/dev-ui-page/public/components/example-copy-button/` です。`Example` 接頭辞は「テンプレートの参考資料であり、そのまま使うものではない」ことを示します。
 
+## エラーページと末尾スラッシュ
+
+- **`errorPage()`** — ルートやルーターが返したプレーンテキストのエラー（404、405 など）を、同じステータスとヘッダーのまま `app/actions/error-page.tsx` のページに置き換えます。ルートはエラーを `new Response(null, { status })` で返すだけで済みます。エラーページには canonical と `og:url` を付けません。`/assets/` のモジュールや画像など、ファイルへのリクエストで `Accept` に `text/html` がないものは、プレーンな 404 のままにします。
+- **`trailingSlash()`** — `/path/` を `/path` へ 308 でリダイレクトします（クエリはそのまま、メソッドも保持）。リンクに末尾スラッシュを付けないでください。
+
+## セキュリティ
+
+`app/router.ts` で `securityHeaders()`、`cop()`、`staticFiles()`、`renderWithCsp()` の順に通します。
+
+- **`securityHeaders()`** — すべての応答（静的ファイルを含む）に `X-Content-Type-Options: nosniff` と `X-Frame-Options: DENY` を付け、本番だけ `Strict-Transport-Security: max-age=63072000` を付けます。このホストだけが対象です。`includeSubDomains`（サブドメインもすべて HTTPS に固定）と `preload`（ブラウザに組み込まれた一覧への登録。外すのに数か月かかる）はドメイン全体の判断なので、決めたプロジェクトが `security-headers.ts` の `PRODUCTION_ONLY` に足してください。CSP を持たない応答には `default-src 'none'; frame-ancestors 'none'` を付けます。投げられた例外は、これらのヘッダー付きの 500 にします。
+- **`renderWithCsp()`** — Remix の `csp()` の中で `render()` を動かし、リクエストごとの nonce で CSP を送ります。`css(...)` の `<style>` には `render()` が nonce を付けるので、`style-src` に `'unsafe-inline'` は要りません。自分で書く `<script>`・`<link rel="modulepreload">`・`<ImportMap>` には `nonce={useCspNonce(handle)}` を渡してください（`document.tsx` が例）。外部のオリジン（フォント、解析タグなど）を使い始めたら `app/middleware/csp.tsx` の `DIRECTIVES` に足します。`npm run hmr` のときは HMR の通信先（`http://127.0.0.1:${HMR_PORT}`）を `connect-src` に足します。
+- **`cop()`** — 外部オリジンからの POST などを拒否します。セッションを導入したら、`session()` と `csrf()` を `cop()` の後に足します。
+
 ## 環境変数
 
 `app/env.ts` が `process.env` を読む唯一のモジュールで、他は解決済みの定数をインポートします。
@@ -290,5 +307,6 @@ Node のバージョンは `actions/setup-node` の `node-version-file` で `.no
 
 - `AGENTS.md` — スターター構成とルート所有権の規約。
 - `CLAUDE.md` — 実測から得た規約と落とし穴の記録。
-- `.agents/skills/remix/SKILL.md` — Remix 3 のメンタルモデルとドキュメントの探し方。3.0.0 の `remix new` が生成するものをそのまま置いています（次のバージョンで差分を取り込みやすくするため）。
+- `.claude/skills/review-pr/` — PR レビューで確かめる規約（命名・CSS・構造）。`CLAUDE.md` から抜き出したもので、食い違ったら `CLAUDE.md` が正しい。
+- `.agents/skills/remix/SKILL.md` — Remix 3 のメンタルモデルとドキュメントの探し方。3.2.0 の `remix new` が生成するものをそのまま置いています（次のバージョンで差分を取り込みやすくするため）。
 - `node_modules/remix/INDEX.md` — インストール済みドキュメントの索引。タスクやエクスポート名で検索し、`node_modules/remix/guides/` のガイド、次にパッケージの README を読みます（README のディレクトリ名は必ずしもサブパス名と一致しません。例: `remix/router` → `src/fetch-router/README.md`）。
