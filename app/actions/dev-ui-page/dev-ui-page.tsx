@@ -46,8 +46,8 @@ export function DevUiPage(handle: Handle<{ url: URL }>) {
               無効
             </PrimitiveButton>
           </Specimen>
-          <Specimen label="nonClickableTag=span（既定・不活性）">
-            <PrimitiveButton>ラベルのみ</PrimitiveButton>
+          <Specimen label="nonClickableTag=span（不活性）">
+            <PrimitiveButton nonClickableTag="span">ラベルのみ</PrimitiveButton>
           </Specimen>
           <Specimen label="nonClickableTag=div + role">
             <PrimitiveButton nonClickableTag="div" role="button" ariaLabel="不活性な div">
