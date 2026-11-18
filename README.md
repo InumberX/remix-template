@@ -9,7 +9,7 @@
 
 ## 必要環境
 
-Node.js **24.3.0 以上**（`.node-version` と `volta` は 24.16.0 を固定）。`remix/node-tsx` が `module.registerHooks` を使うためで、これより古いランタイムでは `remix` CLI も含めて全てのコマンドが失敗します。
+Node.js **26.0.0 以上**（`.node-version` は 26.13.0 を固定）。`remix/node-tsx` が `module.registerHooks` を使うため、24.3.0 より古いランタイムでは `remix` CLI も含めて全てのコマンドが失敗します。
 
 ## セットアップ
 
