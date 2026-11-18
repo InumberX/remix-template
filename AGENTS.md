@@ -23,6 +23,7 @@ Refer to ./.agents/skills/remix/SKILL.md for the Remix mental model and how to f
 - `app/router.ts` wires routes to route handlers and installs the standard Remix component renderer used by actions
 - `app/assets.ts` owns the server-side asset pipeline used by the asset route and render middleware
 - `app/env.ts` is the only module that reads `process.env`; everything else imports the resolved constants
+- `app/middleware/` holds request-lifecycle middleware: security headers and the CSP (`csp.tsx`, which wraps `render()`)
 - `app/actions/controller.tsx` owns the direct leaf route actions (`assets`, `home`, `devUi`)
 - `app/actions/<route-key>/controller.tsx` owns a nested route map (`articles/`)
 - `app/actions/<route-key>-page/<route-key>-page.tsx` renders one page; `document.tsx` and `meta.tsx` are the shared shell and metadata defaults

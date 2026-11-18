@@ -44,7 +44,7 @@ describe('getLineClamp', () => {
     const html = await renderToString(<span mix={css(getLineClamp(3))}>x</span>)
 
     assert.match(html, /display: -webkit-box/)
-    assert.match(html, /-webkit-line-clamp: 3/)
+    assert.match(html, /-webkit-line-clamp: 3;/)
     assert.match(html, /overflow: hidden/)
   })
 })

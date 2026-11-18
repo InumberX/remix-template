@@ -20,7 +20,11 @@ describe('BaseButton over PrimitiveButton', () => {
   })
 
   it('resolves the tier override inside a single class', async () => {
-    const html = await renderToString(<BaseButton tone="primary">Go</BaseButton>)
+    const html = await renderToString(
+      <BaseButton tone="primary" nonClickableTag="span">
+        Go
+      </BaseButton>
+    )
 
     // One host class: reset and styled recipe were merged, not stacked.
     assert.equal(classesOf(html).length, 1)

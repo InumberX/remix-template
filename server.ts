@@ -1,6 +1,7 @@
 import * as http from 'node:http'
 import { createRequestListener } from 'remix/node-fetch-server'
 
+import { assets } from './app/assets.ts'
 import { HMR_PROXY_PORT, IS_NODE_HMR, PORT } from './app/env.ts'
 import { router } from './app/router.ts'
 
@@ -28,7 +29,9 @@ const shutdown = () => {
   }
 
   shuttingDown = true
-  server.close(() => process.exit(0))
+  // Close the asset server too before exiting: in development it holds the file
+  // watcher and, under `npm run hmr`, the browser HMR channel.
+  server.close(() => assets.close().finally(() => process.exit(0)))
   server.closeAllConnections()
 }
 

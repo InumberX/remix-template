@@ -7,11 +7,14 @@ import { APP_PORT, HMR_PORT, PORT } from './app/env.ts'
 
 const hmrRunner = run('server.ts', {
   env: {
-    // Pass the parent environment through unchanged, then override the two
-    // ports the child must use. This spread is not an env *read*, so it stays.
+    // Pass the parent environment through unchanged, then override the ports
+    // the child must use. This spread is not an env *read*, so it stays.
+    // HMR_PORT is passed too: the child would otherwise derive it from its own
+    // PORT (APP_PORT + 1), and its CSP has to name the real browser channel.
     ...process.env,
     PORT: String(APP_PORT),
     HMR_PROXY_PORT: String(PORT),
+    HMR_PORT: String(HMR_PORT),
   },
   nodeArgs: ['--import', 'remix/node-tsx', '--import', 'remix/component-hmr/node'],
   browserHmrChannel: { port: HMR_PORT },
